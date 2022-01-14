@@ -1,0 +1,12 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/apps
+    username: postgres
+    password: helloworld
+
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
