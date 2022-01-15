@@ -5,6 +5,7 @@ import com.example.coderamabackend.binary_obj.EntityBinaryObject;
 import com.example.coderamabackend.item.DaoItem;
 import com.example.coderamabackend.item.EntityItem;
 import com.example.coderamabackend.jdbi.EntityRowMapper;
+import com.example.coderamabackend.order.DaoOrder;
 import com.example.coderamabackend.rate.DaoRate;
 import com.example.coderamabackend.rate.EntityRate;
 import org.jdbi.v3.core.Jdbi;
@@ -45,6 +46,7 @@ public class JdbiConfig {
         this.jdbi.registerRowMapper(RowMapperFactory.of(EntityRate.class, new EntityRowMapper<>(EntityRate.class)));
         this.jdbi.registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)));
         this.jdbi.registerRowMapper(RowMapperFactory.of(EntityBinaryObject.class, new EntityRowMapper<>(EntityBinaryObject.class)));
+        this.jdbi.registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)));
     }
 
     @Bean
@@ -63,8 +65,13 @@ public class JdbiConfig {
     }
 
     @Bean
-    DaoBinaryObject daoBinaryObject() {
+    public DaoBinaryObject daoBinaryObject() {
         return this.jdbi.onDemand(DaoBinaryObject.class);
+    }
+
+    @Bean
+    public DaoOrder daoOrder() {
+        return this.jdbi.onDemand(DaoOrder.class);
     }
 
 
