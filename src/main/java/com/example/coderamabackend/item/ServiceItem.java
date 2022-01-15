@@ -17,7 +17,7 @@ public class ServiceItem {
     }
 
     public DtoItem findByUuid(String uuid) {
-        return DtoConverter.convertJoined(this.daoItem.findByUuid(uuid), DtoItem.class);
+        return DtoConverter.convertJoined(this.daoItem.findByUuidWithImage(uuid), DtoItem.class);
     }
 
     public List<DtoItem> findAllWithImages() {

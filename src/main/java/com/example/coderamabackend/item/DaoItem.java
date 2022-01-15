@@ -13,6 +13,11 @@ import java.util.stream.Collectors;
 @Repository
 public interface DaoItem extends AbstractDao<EntityItem> {
 
+    /**
+     * Finds all items with their images
+     *
+     * @return  joined items with images
+     */
     default List<JoinedEntity> findAllWithImages() {
         return getHandle()
                 .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id")
@@ -24,7 +29,13 @@ public interface DaoItem extends AbstractDao<EntityItem> {
                 )).collect(Collectors.toList());
     }
 
-    default JoinedEntity findByUuid(String uuid) {
+    /**
+     * Finds item by uuid joined with its image
+     *
+     * @param uuid  wanted uuid
+     * @return      joined with image
+     */
+    default JoinedEntity findByUuidWithImage(String uuid) {
         return getHandle()
                 .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.uuid = :uuid")
                 .bind("uuid", uuid)
