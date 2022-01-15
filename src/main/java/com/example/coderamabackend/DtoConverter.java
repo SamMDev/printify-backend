@@ -69,7 +69,7 @@ public class DtoConverter {
         for (String clazzName : joined.keySet()) {
 
             Object entity = joined.get(clazzName);
-            List<Method> entityGetters = Arrays
+            final List<Method> entityGetters = Arrays
                     .stream(entity.getClass().getDeclaredMethods())
                     .filter(m -> m.getName().startsWith("get"))
                     .collect(Collectors.toList());

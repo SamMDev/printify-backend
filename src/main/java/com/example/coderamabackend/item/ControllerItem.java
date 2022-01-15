@@ -21,6 +21,11 @@ public class ControllerItem {
         return this.serviceItem.findAllWithImages();
     }
 
+    @GetMapping("/uuid/{uuid}")
+    public DtoItem findByUuid(@PathVariable("uuid") String uuid) {
+        return this.serviceItem.findByUuid(uuid);
+    }
+
     @DeleteMapping("/delete/id/{id}")
     public void deleteById(@PathVariable("id") Long id) {
         this.serviceItem.deleteById(id);

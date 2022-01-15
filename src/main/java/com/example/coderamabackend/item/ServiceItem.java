@@ -16,11 +16,8 @@ public class ServiceItem {
         this.daoItem = daoItem;
     }
 
-    public List<DtoItem> findAll() {
-        return this.daoItem.findAll()
-                .stream()
-                .map(e -> DtoConverter.convert(e, DtoItem.class))
-                .collect(Collectors.toList());
+    public DtoItem findByUuid(String uuid) {
+        return DtoConverter.convertJoined(this.daoItem.findByUuid(uuid), DtoItem.class);
     }
 
     public List<DtoItem> findAllWithImages() {

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class DtoItem {
     private String name;
+    private String uuid;
     private String description;
     private String dimensions;
     private BigDecimal price;

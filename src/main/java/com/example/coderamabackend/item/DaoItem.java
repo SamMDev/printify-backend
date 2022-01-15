@@ -23,4 +23,17 @@ public interface DaoItem extends AbstractDao<EntityItem> {
                                 Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
                 )).collect(Collectors.toList());
     }
+
+    default JoinedEntity findByUuid(String uuid) {
+        return getHandle()
+                .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.uuid = :uuid")
+                .bind("uuid", uuid)
+                .reduceRows(
+                        new JoinedEntityRowReducer(
+                                EntityItem.class,
+                                "item",
+                                Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                        ))
+                .findFirst().orElse(null);
+    }
 }

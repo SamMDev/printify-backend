@@ -17,6 +17,9 @@ import java.math.BigDecimal;
 @Table(name = "item", schema = "printify")
 public class EntityItem extends BaseEntity {
 
+    @Column(name = "uuid", length = 36)
+    private String uuid;
+
     @Column(name = "name", length = 100)
     private String name;
 
