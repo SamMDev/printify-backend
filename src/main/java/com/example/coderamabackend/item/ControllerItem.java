@@ -23,7 +23,12 @@ public class ControllerItem {
 
     @GetMapping("/uuid/{uuid}")
     public DtoItem findByUuid(@PathVariable("uuid") String uuid) {
-        return this.serviceItem.findByUuid(uuid);
+        return this.serviceItem.findByUuidWithImage(uuid);
+    }
+
+    @PostMapping("/uuid")
+    public List<DtoItem> findByUuids(@RequestBody List<String> uuids) {
+        return this.serviceItem.findByUuidsWithImages(uuids);
     }
 
     @DeleteMapping("/delete/id/{id}")

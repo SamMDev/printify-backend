@@ -47,4 +47,17 @@ public interface DaoItem extends AbstractDao<EntityItem> {
                         ))
                 .findFirst().orElse(null);
     }
+
+    default List<JoinedEntity> findByUuidsWithImages(List<String> uuids) {
+        return getHandle()
+                .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.uuid IN (<uuids>)")
+                .bindList("uuids", uuids)
+                .reduceRows(
+                        new JoinedEntityRowReducer(
+                                EntityItem.class,
+                                "item",
+                                Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                        ))
+                .collect(Collectors.toList());
+    }
 }
