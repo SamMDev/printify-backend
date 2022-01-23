@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.Getter;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -39,6 +40,20 @@ public class DtoConverter {
     public static <O, C> C convert(O object, Class<C> clazz) {
         if (object == null || clazz == null) return null;
         return objectMapper.convertValue(object, clazz);
+    }
+
+    /**
+     * Reads given string into clazz object
+     *
+     * @param serialized    object as json string
+     * @param clazz         to be converted to
+     * @param <C>           type of class
+     * @return              deserialized object
+     */
+    @SneakyThrows
+    public static <C> C read(String serialized, Class<C> clazz) {
+        if (serialized == null || clazz == null) return null;
+        return objectMapper.readValue(serialized, clazz);
     }
 
     /**

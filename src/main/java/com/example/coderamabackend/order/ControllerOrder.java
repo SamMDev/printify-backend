@@ -1,9 +1,8 @@
 package com.example.coderamabackend.order;
 
+import com.example.coderamabackend.order.dto.DtoRequestOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/order")
@@ -14,5 +13,10 @@ public class ControllerOrder {
     @Autowired
     public ControllerOrder(ServiceOrder serviceOrder) {
         this.serviceOrder = serviceOrder;
+    }
+
+    @PostMapping("/save")
+    public void saveOrder(@RequestBody DtoRequestOrder order) {
+        this.serviceOrder.saveOrder(order);
     }
 }

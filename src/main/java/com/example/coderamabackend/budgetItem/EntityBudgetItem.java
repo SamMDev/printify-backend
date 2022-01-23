@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Table(name = "offerItem", schema = "banker")
 public class EntityBudgetItem extends BaseEntity {
 
-    @Column(name = "name")
+    @Column(name = "namefirstName")
     private String name;
 
     @Column(name = "manhours")

@@ -16,8 +16,14 @@ import java.time.LocalDate;
 @Table(name = "order", schema = "printify")
 public class EntityOrder extends BaseEntity {
 
-    @Column(name = "name", length = 100)
-    private String name;
+    @Column(name = "fname", length = 100)
+    private String firstName;
+
+    @Column(name = "lname", length = 100)
+    private String lastName;
+
+    @Column(name = "email", length = 200)
+    private String email;
 
     @Column(name = "street", length = 100)
     private String street;
@@ -26,7 +32,7 @@ public class EntityOrder extends BaseEntity {
     private String city;
 
     @Column(name = "postcode", length = 10)
-    private String postcode;
+    private String postCode;
 
     @Column(name = "phone", length = 20)
     private String phone;
