@@ -59,20 +59,4 @@ public class JdbiConfig {
         return this.jdbi.onDemand(DaoRate.class);
     }
 
-    @Bean
-    public DaoItem daoItem() {
-        return this.jdbi.onDemand(DaoItem.class);
-    }
-
-    @Bean
-    public DaoBinaryObject daoBinaryObject() {
-        return this.jdbi.onDemand(DaoBinaryObject.class);
-    }
-
-    @Bean
-    public DaoOrder daoOrder() {
-        return this.jdbi.onDemand(DaoOrder.class);
-    }
-
-
 }

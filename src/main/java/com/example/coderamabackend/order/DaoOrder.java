@@ -1,8 +1,15 @@
 package com.example.coderamabackend.order;
 
-import com.example.coderamabackend.jdbi.AbstractDao;
+import com.example.coderamabackend.jdbi.BaseDao;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DaoOrder extends AbstractDao<EntityOrder> {
+public class DaoOrder extends BaseDao<EntityOrder> {
+
+    @Autowired
+    public DaoOrder(Jdbi jdbi) {
+        super(EntityOrder.class, jdbi);
+    }
 }
