@@ -5,10 +5,11 @@ import org.jdbi.v3.core.Jdbi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BaseDao<E extends BaseEntity> {
     private static final String INSERT_ENTITY_TEMPLATE = "INSERT INTO <NAME> (<COLUMNS>) VALUES (<VALUES>)";
-    private static final String UPDATE_ENTITY_TEMPLATE = "UPDATE <NAME> (<COLUMNS>) VALUES (<VALUES>) WHERE (<WHERE>)";
+    private static final String UPDATE_ENTITY_TEMPLATE = "UPDATE <NAME> SET <SET> WHERE id = :id";
     private static final String DELETE_BY_ID_TEMPLATE = "DELETE FROM <NAME> WHERE id = :id";
     private static final String FIND_ALL_TEMPLATE = "SELECT * FROM <NAME>";
     private static final String FIND_BY_ID_TEMPLATE = "SELECT * FROM <NAME> WHERE id = :id";
@@ -50,9 +51,10 @@ public class BaseDao<E extends BaseEntity> {
         UPDATE_ENTITY = UPDATE_ENTITY_TEMPLATE
                 .replace("<NAME>", TABLE_NAME)
                 // don't ever want to update ID
-                .replace("<COLUMNS>", StringUtils.join(COLS_NAMES, ","))
-                .replace("<VALUES>", StringUtils.join(FIELD_NAMES, ","))
-                .replace("<WHERE>", "id = :id");
+                .replace("<SET>", StringUtils.join(
+                        reflect.getColumnNameFieldNamePairsWithoutId().stream().map(pair -> pair.getLeft() + " = :" + pair.getRight()).collect(Collectors.toList()),
+                        ",")
+                );
 
         DELETE_BY_ID = DELETE_BY_ID_TEMPLATE
                 .replace("<NAME>", TABLE_NAME);
@@ -83,11 +85,7 @@ public class BaseDao<E extends BaseEntity> {
     }
 
     public void deleteById(Long id) {
-        this.jdbi.withHandle(
-                handle -> handle
-                        .createUpdate(DELETE_BY_ID)
-                        .bind("id", id)
-        );
+        this.jdbi.withHandle(handle -> handle.createUpdate(DELETE_BY_ID).bind("id", id).execute());
     }
 
     public List<E> findAll() {
