@@ -5,7 +5,7 @@ import com.example.coderamabackend.order.dto.DtoRequestOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class ServiceOrder {
@@ -19,7 +19,7 @@ public class ServiceOrder {
     public void saveOrder(DtoRequestOrder order) {
         EntityOrder entityOrder = DtoConverter.convert(order, EntityOrder.class);
         if (entityOrder == null) return;
-        entityOrder.setDate(LocalDate.now());
+        entityOrder.setDate(LocalDateTime.now());
 
         this.daoOrder.insert(entityOrder);
     }
