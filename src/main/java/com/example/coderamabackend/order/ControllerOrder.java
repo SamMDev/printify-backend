@@ -1,5 +1,6 @@
 package com.example.coderamabackend.order;
 
+import com.example.coderamabackend.order.dto.DtoOrder;
 import com.example.coderamabackend.order.dto.DtoRequestOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,11 @@ public class ControllerOrder {
     @Autowired
     public ControllerOrder(ServiceOrder serviceOrder) {
         this.serviceOrder = serviceOrder;
+    }
+
+    @GetMapping("/id/{id}")
+    public DtoOrder getById(@PathVariable("id") Long id) {
+        return this.serviceOrder.getById(id);
     }
 
     @PostMapping("/save")

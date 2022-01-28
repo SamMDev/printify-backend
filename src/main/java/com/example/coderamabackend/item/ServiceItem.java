@@ -1,6 +1,6 @@
 package com.example.coderamabackend.item;
 
-import com.example.coderamabackend.DtoConverter;
+import com.example.coderamabackend.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +18,13 @@ public class ServiceItem {
     }
 
     public DtoItem findByUuidWithImage(String uuid) {
-        return DtoConverter.convertJoined(this.daoItem.findByUuidWithImage(uuid), DtoItem.class);
+        return Converter.convertJoined(this.daoItem.findByUuidWithImage(uuid), DtoItem.class);
     }
 
     public List<DtoItem> findAllWithImages() {
         return this.daoItem.findAllWithImages()
                 .stream()
-                .map(e -> DtoConverter.convertJoined(e, DtoItem.class))
+                .map(e -> Converter.convertJoined(e, DtoItem.class))
                 .collect(Collectors.toList());
     }
 
@@ -32,7 +32,7 @@ public class ServiceItem {
         if (uuids == null || uuids.isEmpty()) return Collections.emptyList();
         return this.daoItem.findByUuidsWithImages(uuids)
                 .stream()
-                .map(e -> DtoConverter.convertJoined(e, DtoItem.class))
+                .map(e -> Converter.convertJoined(e, DtoItem.class))
                 .collect(Collectors.toList());
     }
 

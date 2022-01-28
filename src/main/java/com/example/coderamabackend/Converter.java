@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Converter used for mapping between objects
  * @author SamMDev
  */
-public class DtoConverter {
+public class Converter {
 
     @Getter
     private static final ObjectMapper objectMapper =

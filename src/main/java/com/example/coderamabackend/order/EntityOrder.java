@@ -16,10 +16,10 @@ import java.time.LocalDateTime;
 @Table(name = "order", schema = "printify")
 public class EntityOrder extends BaseEntity {
 
-    @Column(name = "fname", length = 100)
+    @Column(name = "firstname", length = 100)
     private String firstName;
 
-    @Column(name = "lname", length = 100)
+    @Column(name = "lastname", length = 100)
     private String lastName;
 
     @Column(name = "email", length = 200)
