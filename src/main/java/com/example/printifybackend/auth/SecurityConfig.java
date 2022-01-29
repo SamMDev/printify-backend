@@ -45,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // make access conditions
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/login").permitAll();     // anyone can access this
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/login", "/auth/token/refresh").permitAll();     // anyone can access this
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/item/**").permitAll();   // anyone can access items
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/order/**").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS");  // only authorized users can access this
         // everyone doing request must be authenticated
