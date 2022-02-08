@@ -23,7 +23,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(
+        securedEnabled = true,
+        jsr250Enabled = true,
+        prePostEnabled = true
+)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -58,10 +62,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests()
                 // Our public endpoints
-                .antMatchers(HttpMethod.GET, "/item/all").hasAnyAuthority("MANAGE_USERS", "ADD_PRODUCTS", "MANAGE_ORDERS", "SHOW_ORDERS")
+                .antMatchers(HttpMethod.GET, "/item/all").permitAll()
                 .antMatchers(HttpMethod.POST, "/auth/sign-up").permitAll()
                 .antMatchers(HttpMethod.POST, "/auth/sign-in").permitAll()
+                .antMatchers(HttpMethod.POST, "/order/save").permitAll()
                 // Our private endpoints
+                .antMatchers(HttpMethod.GET, "/order/id/**").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
                 .anyRequest().authenticated();
 
         // add filter before every request (to check if is authorized)
