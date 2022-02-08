@@ -10,10 +10,15 @@ import com.example.printifybackend.user.ServiceUser;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +36,9 @@ public class ControllerAuth {
 
     private final ServiceUserAuth serviceUserAuth;
     private final ServiceUser serviceUser;
+    private final ServiceAuth serviceAuth;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -48,7 +56,7 @@ public class ControllerAuth {
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
                 .withIssuer(request.getRequestURL().toString())
-                .withClaim("roles", this.serviceUser.getPrivilegesForUser(user).stream().map(Privileges::name).collect(Collectors.toList()))
+                .withClaim("roles", this.serviceUser.getPrivilegesForUser(user).stream().map(Privilege::name).collect(Collectors.toList()))
                 .sign(algorithm);
         Map<String, String> tokenMap = new HashMap<>(){
             {
@@ -60,4 +68,48 @@ public class ControllerAuth {
         Converter.getObjectMapper().writeValue(response.getOutputStream(), tokenMap);
     }
 
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> registerUser(@RequestBody SignUpRequest request) {
+        final String username = request.getUsername();
+        final String password = request.getPassword();
+
+        if (this.serviceUser.existsByUsername(request.getUsername()))
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: username already taken"));
+
+        if (!this.serviceAuth.isPasswordValid(password))
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: invalid password, choose better one"));
+
+        if (!this.serviceAuth.isUsernameFormatValid(username))
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: invalid username, choose better one"));
+
+
+        this.serviceUser.saveNewUser(username, password);
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            final String accessToken = this.jwtUtils.generateAccessToken(authentication);
+
+            CustomizedUserDetails userDetails = (CustomizedUserDetails) authentication.getPrincipal();
+            final Set<String> privileges = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, this.jwtUtils.generateAccessToken(userDetails))
+                    .body(this.serviceAuth.mapUserDetailsToDto(userDetails));
+
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
 }

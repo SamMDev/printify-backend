@@ -30,4 +30,14 @@ public class DaoUser extends BaseDao<EntityUser> {
                                 .first()
         );
     }
+
+    public Boolean existsByUsername(String username) {
+        return this.jdbi.withHandle(
+                handle ->
+                        handle.createQuery("SELECT EXISTS (SELECT 1 FROM printify.user WHERE username = :username)")
+                                .bind("username", username)
+                                .mapTo(Boolean.class)
+                                .first()
+        );
+    }
 }

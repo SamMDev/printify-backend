@@ -1,5 +1,7 @@
 package com.example.printifybackend.auth;
 
+import com.example.printifybackend.auth.filter.AuthenticationUnauthorizedEntryPoint;
+import com.example.printifybackend.auth.filter.AuthorizationTokenFilter;
 import com.example.printifybackend.auth.filter.CustomAuthenticationFilter;
 import com.example.printifybackend.auth.filter.CustomAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -20,12 +23,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     // my implementation of UserDetailsService
     private final ServiceUserAuth userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthorizationTokenFilter authorizationTokenFilter;
+    private final AuthenticationUnauthorizedEntryPoint unauthorizedEntryPoint;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -35,27 +41,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     /**
      * Configuring http requests
+         * Configuring paths and access restrictions (privileges)
      */
     protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(this.authenticationManagerBean());
-        customAuthenticationFilter.setFilterProcessesUrl("/login");
+        http = http.cors().and().csrf().disable();
 
-        http.csrf().disable();
-        // static controllers (because using tokens, not sessions)
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http = http
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and();
 
-        // make access conditions
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/login", "/auth/token/refresh").permitAll();     // anyone can access this
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/item/**").permitAll();   // anyone can access items
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/order/**").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS");  // only authorized users can access this
-        // everyone doing request must be authenticated
-        http.authorizeRequests().anyRequest().authenticated();
+        // add unauthorized endpoint
+        http = http.exceptionHandling().authenticationEntryPoint(this.unauthorizedEntryPoint).and();
 
-        // filters
-        // authentication filter
-        http.addFilter(customAuthenticationFilter);
-        // authorization filter
-        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
+
+        http.authorizeRequests()
+                // Our public endpoints
+                .antMatchers(HttpMethod.GET, "/item/all").hasAnyAuthority("MANAGE_USERS", "ADD_PRODUCTS", "MANAGE_ORDERS", "SHOW_ORDERS")
+                .antMatchers(HttpMethod.POST, "/auth/sign-up").permitAll()
+                .antMatchers(HttpMethod.POST, "/auth/sign-in").permitAll()
+                // Our private endpoints
+                .anyRequest().authenticated();
+
+        // add filter before every request (to check if is authorized)
+        http.addFilterBefore(this.authorizationTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

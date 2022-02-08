@@ -6,6 +6,7 @@ import com.example.printifybackend.jdbi.EntityRowMapper;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapperFactory;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,14 +20,22 @@ public class JdbiConfig {
 
     private DataSource dataSource;
 
+    @Value("${spring.datasource.url}")
+    private String url;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
     private Jdbi jdbi;
 
-    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource driverManagerDataSource() {
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
-        driverManagerDataSource.setUrl("jdbc:postgresql://localhost:5432/printify");
-        driverManagerDataSource.setUsername("postgres");
-        driverManagerDataSource.setPassword("helloworld");
+        driverManagerDataSource.setUrl(this.url);
+        driverManagerDataSource.setUsername(this.username);
+        driverManagerDataSource.setPassword(this.password);
         return driverManagerDataSource;
     }
 

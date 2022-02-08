@@ -5,12 +5,11 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.printifybackend.Converter;
-import com.example.printifybackend.auth.Privileges;
+import com.example.printifybackend.auth.Privilege;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,9 +24,19 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-
+/**
+ * This filter executes once per request
+ */
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
+
     @Override
+    /**
+     * 1. Get JWT from authorization header, remove bearer
+     * 2. Get username from token
+     * 3. Get user details by username
+     * 4. From user details, create Authentication object (UsernamePasswordAuthenticationToken)
+     * 5. Set authentication in security context holder
+     */
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().equals("/login") || request.getServletPath().equals("/auth/token/refresh")) {
             filterChain.doFilter(request, response);
@@ -47,7 +56,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             DecodedJWT decodedJWT = verifier.verify(token);
             String username = decodedJWT.getSubject();
             String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
-            Collection<GrantedAuthority> grantedAuthorities = Arrays.stream(roles).map(Privileges::valueOf).collect(Collectors.toList());
+            Collection<GrantedAuthority> grantedAuthorities = Arrays.stream(roles).map(Privilege::valueOf).collect(Collectors.toList());
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

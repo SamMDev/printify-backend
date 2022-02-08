@@ -15,7 +15,7 @@ public class ControllerUser {
     private final ServiceUser serviceUser;
 
     @GetMapping("/all")
-    public ResponseEntity<List<EntityUser>> getUsers() {
+    public ResponseEntity<List<DtoUser>> getUsers() {
         return ResponseEntity.ok().body(this.serviceUser.getUsers());
     }
 

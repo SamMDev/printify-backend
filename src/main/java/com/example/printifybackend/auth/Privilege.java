@@ -2,7 +2,7 @@ package com.example.printifybackend.auth;
 
 import org.springframework.security.core.GrantedAuthority;
 
-public enum Privileges implements GrantedAuthority {
+public enum Privilege implements GrantedAuthority {
     MANAGE_USERS,
     ADD_PRODUCTS,
     MANAGE_ORDERS,

@@ -2,8 +2,8 @@ package com.example.printifybackend.user;
 
 
 import com.example.printifybackend.Converter;
-import com.example.printifybackend.auth.Privileges;
-import com.example.printifybackend.auth.Roles;
+import com.example.printifybackend.auth.Privilege;
+import com.example.printifybackend.auth.Role;
 import com.example.printifybackend.jdbi.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,10 +41,10 @@ public class EntityUser extends BaseEntity {
      *
      * @return set of user roles deserialized
      */
-    public Set<Roles> deserializeUserRoles() {
+    public Set<Role> deserializeUserRoles() {
         if (StringUtils.isBlank(this.roles)) return Collections.emptySet();
         return Arrays.stream(Converter.read(this.roles, String[].class))
-                .map(Roles::valueOf)
+                .map(Role::valueOf)
                 .collect(Collectors.toSet());
     }
 
@@ -53,10 +54,22 @@ public class EntityUser extends BaseEntity {
      *
      * @return set of user privileges deserialized
      */
-    public Set<Privileges> deserializeUserPrivileges() {
+    public Set<Privilege> deserializeUserPrivileges() {
         if (StringUtils.isBlank(this.privileges)) return Collections.emptySet();
         return Arrays.stream(Converter.read(this.roles, String[].class))
-                .map(Privileges::valueOf)
+                .map(Privilege::valueOf)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets all the privileges user has
+     * @return  privileges
+     */
+    public Set<Privilege> getAllPrivileges() {
+        final Set<Privilege> privileges = new HashSet<>(this.deserializeUserPrivileges());
+        for (Role role : this.deserializeUserRoles()) {
+            privileges.addAll(role.getPrivileges());
+        }
+        return privileges;
     }
 }

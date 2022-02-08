@@ -1,6 +1,7 @@
 package com.example.printifybackend.auth;
 
 import com.example.printifybackend.user.EntityUser;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,16 +18,15 @@ import java.util.Set;
 public class CustomizedUserDetails implements UserDetails {
 
     private final EntityUser user;
-    private final Set<Roles> roles = new HashSet<>();
-    private final Set<Privileges> privileges = new HashSet<>();
+    @Getter
+    private final Set<Role> roles = new HashSet<>();
+    @Getter
+    private final Set<Privilege> privileges = new HashSet<>();
 
     public CustomizedUserDetails(EntityUser user) {
         this.user = user;
         this.roles.addAll(this.user.deserializeUserRoles());
-
-        this.privileges.addAll(this.user.deserializeUserPrivileges());
-        // aside from serialized privileges of user, he also has privileges assigned to his roles
-        roles.forEach(r -> privileges.addAll(r.getPrivileges()));
+        this.privileges.addAll(this.user.getAllPrivileges());
     }
 
     @Override

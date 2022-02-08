@@ -1,9 +1,13 @@
 server:
   port: 8081
 
+jwt:
+  secret: secret
+  expiration: 100000
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/apps
+    url: jdbc:postgresql://localhost:5432/printify
     username: postgres
     password: helloworld
 
