@@ -46,4 +46,7 @@ public class EntityOrder extends BaseEntity {
     @Column(name = "price")
     private BigDecimal price;
 
+    @Column(name = "finished")
+    private Boolean finished;
+
 }

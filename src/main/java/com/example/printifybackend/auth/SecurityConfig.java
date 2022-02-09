@@ -61,13 +61,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
 
         http.authorizeRequests()
+
+                .antMatchers(HttpMethod.OPTIONS, "/auth/sign-in").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/auth/sign-up").permitAll()
+
                 // Our public endpoints
                 .antMatchers(HttpMethod.GET, "/item/all").permitAll()
+                .antMatchers(HttpMethod.GET, "/order/save").permitAll()
+                .antMatchers(HttpMethod.POST, "/order/get").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
+
                 .antMatchers(HttpMethod.POST, "/auth/sign-up").permitAll()
                 .antMatchers(HttpMethod.POST, "/auth/sign-in").permitAll()
                 .antMatchers(HttpMethod.POST, "/order/save").permitAll()
+                .antMatchers(HttpMethod.POST, "/item/uuid").permitAll()
+                .antMatchers(HttpMethod.GET, "/item/uuid/**").permitAll()
                 // Our private endpoints
-                .antMatchers(HttpMethod.GET, "/order/id/**").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
                 .anyRequest().authenticated();
 
         // add filter before every request (to check if is authorized)

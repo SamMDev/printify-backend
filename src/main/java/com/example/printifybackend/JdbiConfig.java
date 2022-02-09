@@ -3,6 +3,7 @@ package com.example.printifybackend;
 import com.example.printifybackend.binary_obj.EntityBinaryObject;
 import com.example.printifybackend.item.EntityItem;
 import com.example.printifybackend.jdbi.EntityRowMapper;
+import com.example.printifybackend.order.EntityOrder;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapperFactory;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -48,6 +49,7 @@ public class JdbiConfig {
         this.jdbi.registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)));
         this.jdbi.registerRowMapper(RowMapperFactory.of(EntityBinaryObject.class, new EntityRowMapper<>(EntityBinaryObject.class)));
         this.jdbi.registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)));
+        this.jdbi.registerRowMapper(RowMapperFactory.of(EntityOrder.class, new EntityRowMapper<>(EntityOrder.class)));
     }
 
     @Bean

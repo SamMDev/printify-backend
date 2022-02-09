@@ -10,6 +10,6 @@ import java.util.Set;
 @Getter @Setter
 public class DtoPrincipal {
     private String username;
-    private Set<String> roles;
     private Set<String> privileges;
+    private String accessToken;
 }

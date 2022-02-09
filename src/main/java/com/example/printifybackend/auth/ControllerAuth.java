@@ -102,11 +102,9 @@ public class ControllerAuth {
             final String accessToken = this.jwtUtils.generateAccessToken(authentication);
 
             CustomizedUserDetails userDetails = (CustomizedUserDetails) authentication.getPrincipal();
-            final Set<String> privileges = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, this.jwtUtils.generateAccessToken(userDetails))
-                    .body(this.serviceAuth.mapUserDetailsToDto(userDetails));
+                    .body(this.serviceAuth.mapUserDetailsToDto(userDetails, accessToken));
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

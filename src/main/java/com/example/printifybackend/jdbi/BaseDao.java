@@ -5,6 +5,7 @@ import org.jdbi.v3.core.Jdbi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BaseDao<E extends BaseEntity> {
@@ -94,5 +95,11 @@ public class BaseDao<E extends BaseEntity> {
                                 .mapToBean(reflect.getType())
                                 .list()
         );
+    }
+
+    public String getLimitOffsetQuery(Integer limit, Integer offset) {
+        return
+                (limit != null ? " LIMIT " + limit : "") +
+                (offset != null ? " OFFSET " + offset : "");
     }
 }

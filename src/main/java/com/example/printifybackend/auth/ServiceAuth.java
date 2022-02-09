@@ -20,11 +20,11 @@ public class ServiceAuth {
         return (StringUtils.isNotBlank(username) && username.length() > 4 && username.length() <= 15);
     }
 
-    public DtoPrincipal mapUserDetailsToDto(CustomizedUserDetails details) {
+    public DtoPrincipal mapUserDetailsToDto(CustomizedUserDetails details, String accessToken) {
         return DtoPrincipal.builder()
                 .username(details.getUsername())
-                .roles(details.getRoles().stream().map(Role::name).collect(Collectors.toSet()))
                 .privileges(details.getPrivileges().stream().map(Privilege::name).collect(Collectors.toSet()))
+                .accessToken(accessToken)
                 .build();
     }
 }
