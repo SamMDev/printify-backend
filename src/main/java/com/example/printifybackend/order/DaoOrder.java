@@ -1,7 +1,7 @@
 package com.example.printifybackend.order;
 
 import com.example.printifybackend.jdbi.BaseDao;
-import com.example.printifybackend.jdbi.Criteria;
+import com.example.printifybackend.jdbi.LazyCriteria;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -21,12 +21,29 @@ public class DaoOrder extends BaseDao<EntityOrder> {
         super(EntityOrder.class, jdbi);
     }
 
-    public List<EntityOrder> getOrdersWithCriteria(Criteria criteria) {
+    public List<EntityOrder> getOrdersWithCriteria(LazyCriteria lazyCriteria) {
         final Map<String, Object> bind = new HashMap<>();
-        final Map<String, Object> filters = criteria.getFilters();
 
-        StringBuilder whereBuilder = new StringBuilder();
-        whereBuilder.append(" WHERE ");
+        String whereStatement = this.buildWhereStatement(lazyCriteria.getFilters(), bind);
+        String order = " ORDER BY date desc ";
+        String offsetLimit = this.buildLimitOffsetStatement(lazyCriteria.getLimit(), lazyCriteria.getOffset());
+
+        return this.jdbi.withHandle(
+                handle ->
+                        handle.createQuery("SELECT * FROM printify.order " + whereStatement + order + offsetLimit)
+                                .bindMap(bind)
+                                .mapTo(EntityOrder.class)
+                                .list()
+        );
+    }
+
+    @Override
+    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
+
+        final StringBuilder whereBuilder = new StringBuilder();
+
+        if (!filters.isEmpty()) whereBuilder.append(" WHERE ");
+        else return whereBuilder.toString();
 
         if (filters.containsKey("finished")) {
             Boolean value = (Boolean) filters.get("finished");
@@ -46,16 +63,21 @@ public class DaoOrder extends BaseDao<EntityOrder> {
             whereBuilder.append( " AND date <= :toDate " );
         }
 
-        whereBuilder.append(" ORDER BY date desc ");
-        whereBuilder.append(this.getLimitOffsetQuery(criteria.getLimit(), criteria.getOffset()));
+        return whereBuilder.toString();
+    }
+
+    @Override
+    public Long totalRowCount(Map<String, Object> filters) {
+
+        final Map<String, Object> bind = new HashMap<>();
+        final String whereStatement = this.buildWhereStatement(filters, bind);
 
         return this.jdbi.withHandle(
-                handle ->
-                        handle.createQuery("SELECT * FROM printify.order " + whereBuilder)
-                                .bindMap(bind)
-                                .mapTo(EntityOrder.class)
-                                .list()
+                handle -> handle
+                        .createQuery("SELECT count(*) FROM printify.order " + whereStatement)
+                        .bindMap(bind)
+                        .mapTo(Long.class)
+                        .one()
         );
-
     }
 }

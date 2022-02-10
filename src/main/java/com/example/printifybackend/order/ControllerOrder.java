@@ -1,12 +1,11 @@
 package com.example.printifybackend.order;
 
-import com.example.printifybackend.jdbi.Criteria;
+import com.example.printifybackend.jdbi.LazyCriteria;
+import com.example.printifybackend.jdbi.LazyDataModel;
 import com.example.printifybackend.order.dto.DtoOrder;
 import com.example.printifybackend.order.dto.DtoRequestOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/order")
@@ -25,8 +24,8 @@ public class ControllerOrder {
     }
 
     @PostMapping("/get")
-    public List<DtoOrder> getWithCriteria(@RequestBody Criteria criteria) {
-        return this.serviceOrder.getWithCriteria(criteria);
+    public LazyDataModel getWithCriteria(@RequestBody LazyCriteria lazyCriteria) {
+        return this.serviceOrder.getWithCriteria(lazyCriteria);
     }
 
     @PostMapping("/save")

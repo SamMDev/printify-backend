@@ -75,6 +75,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/order/save").permitAll()
                 .antMatchers(HttpMethod.POST, "/item/uuid").permitAll()
                 .antMatchers(HttpMethod.GET, "/item/uuid/**").permitAll()
+
+                .antMatchers(HttpMethod.GET, "/user/all").hasAuthority("MANAGE_USERS")
+
                 // Our private endpoints
                 .anyRequest().authenticated();
 

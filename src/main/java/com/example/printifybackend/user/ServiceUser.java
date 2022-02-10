@@ -2,6 +2,7 @@ package com.example.printifybackend.user;
 
 import com.example.printifybackend.Converter;
 import com.example.printifybackend.auth.Privilege;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;

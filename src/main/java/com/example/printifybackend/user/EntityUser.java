@@ -56,7 +56,7 @@ public class EntityUser extends BaseEntity {
      */
     public Set<Privilege> deserializeUserPrivileges() {
         if (StringUtils.isBlank(this.privileges)) return Collections.emptySet();
-        return Arrays.stream(Converter.read(this.roles, String[].class))
+        return Arrays.stream(Converter.read(this.privileges, String[].class))
                 .map(Privilege::valueOf)
                 .collect(Collectors.toSet());
     }

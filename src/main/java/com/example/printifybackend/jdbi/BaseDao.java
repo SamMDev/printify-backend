@@ -97,9 +97,17 @@ public class BaseDao<E extends BaseEntity> {
         );
     }
 
-    public String getLimitOffsetQuery(Integer limit, Integer offset) {
+    public String buildLimitOffsetStatement(Long limit, Long offset) {
         return
                 (limit != null ? " LIMIT " + limit : "") +
                 (offset != null ? " OFFSET " + offset : "");
+    }
+
+    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
+        return "";
+    }
+
+    public Long totalRowCount(Map<String, Object> filters) {
+        return 0L;
     }
 }
