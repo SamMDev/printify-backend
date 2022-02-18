@@ -3,6 +3,7 @@ package com.example.printifybackend.order;
 import com.example.printifybackend.jdbi.LazyCriteria;
 import com.example.printifybackend.jdbi.LazyDataModel;
 import com.example.printifybackend.order.dto.DtoOrder;
+import com.example.printifybackend.order.dto.DtoOrderDetail;
 import com.example.printifybackend.order.dto.DtoRequestOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,9 @@ public class ControllerOrder {
         this.serviceOrder = serviceOrder;
     }
 
-    @GetMapping("/id/{id}")
-    public DtoOrder getById(@PathVariable("id") Long id) {
-        return this.serviceOrder.getById(id);
+    @PostMapping("/id/{id}")
+    public DtoOrderDetail getById(@PathVariable("id") Long id) {
+        return this.serviceOrder.getDetailById(id);
     }
 
     @PostMapping("/get")
