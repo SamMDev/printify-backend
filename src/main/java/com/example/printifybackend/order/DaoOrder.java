@@ -2,13 +2,13 @@ package com.example.printifybackend.order;
 
 import com.example.printifybackend.jdbi.BaseDao;
 import com.example.printifybackend.jdbi.LazyCriteria;
+import com.example.printifybackend.jdbi.WhereConditionBuilder;
+import com.example.printifybackend.utils.DateUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class DaoOrder extends BaseDao<EntityOrder> {
     public List<EntityOrder> getOrdersWithCriteria(LazyCriteria lazyCriteria) {
         final Map<String, Object> bind = new HashMap<>();
 
-        String whereStatement = this.buildWhereStatement(lazyCriteria.getFilters(), bind);
+        String whereStatement = this.buildWhereStatement(lazyCriteria.getFilter(), bind);
         String order = " ORDER BY date desc ";
         String offsetLimit = this.buildLimitOffsetStatement(lazyCriteria.getLimit(), lazyCriteria.getOffset());
 
@@ -40,30 +40,33 @@ public class DaoOrder extends BaseDao<EntityOrder> {
     @Override
     public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
 
-        final StringBuilder whereBuilder = new StringBuilder();
+        if (filters == null || filters.isEmpty()) return "";
 
-        if (!filters.isEmpty()) whereBuilder.append(" WHERE ");
-        else return whereBuilder.toString();
+        final WhereConditionBuilder whereConditionBuilder = new WhereConditionBuilder();
 
         if (filters.containsKey("finished")) {
             Boolean value = (Boolean) filters.get("finished");
             bind.put("finished", value);
-            whereBuilder.append(" (finished = :finished) ");
+            whereConditionBuilder.addCondition(" (finished = :finished) ");
         }
 
         if (filters.containsKey("fromDate")) {
-            final LocalDateTime startOfDay = ((LocalDate) filters.get("fromDate")).atStartOfDay();
-            bind.put("fromDate", startOfDay);
-            whereBuilder.append(" AND date >= :fromDate ");
+            final LocalDateTime startOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("fromDate"));
+            if (startOfDay != null) {
+                bind.put("fromDate", startOfDay);
+                whereConditionBuilder.addCondition(" (date >= :fromDate) ");
+            }
         }
 
         if (filters.containsKey("toDate")) {
-            final LocalDateTime endOfDay = ((LocalDate) filters.get("fromDate")).atTime(LocalTime.MAX);
-            bind.put("toDate", endOfDay);
-            whereBuilder.append( " AND date <= :toDate " );
+            final LocalDateTime endOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("toDate"));
+            if (endOfDay != null) {
+                bind.put("toDate", endOfDay);
+                whereConditionBuilder.addCondition( " (date <= :toDate) " );
+            }
         }
 
-        return whereBuilder.toString();
+        return whereConditionBuilder.buildWhere();
     }
 
     @Override

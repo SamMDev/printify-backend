@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class DtoOrder {
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;

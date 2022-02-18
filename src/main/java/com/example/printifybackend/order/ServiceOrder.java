@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,19 +36,16 @@ public class ServiceOrder {
         return Converter.convert(order, DtoOrder.class);
     }
 
-    public LazyDataModel getWithCriteria(LazyCriteria lazyCriteria) {
-        final List<DtoOrder> orders =
+    public List<DtoOrder> getWithCriteria(LazyCriteria lazyCriteria) {
+        return
                 this.daoOrder.getOrdersWithCriteria(lazyCriteria)
                 .stream()
                 .map(o -> Converter.convert(o, DtoOrder.class))
                 .collect(Collectors.toList());
+    }
 
-        return LazyDataModel.builder()
-                .totalRowsCount(this.daoOrder.totalRowCount(lazyCriteria.getFilters()))
-                .offset(lazyCriteria.getOffset())
-                .end(orders.size() < lazyCriteria.getLimit() ? orders.size() : lazyCriteria.getLimit())
-                .data(orders)
-                .build();
+    public Long count(LinkedHashMap<String, Object> filter) {
+        return this.daoOrder.totalRowCount(filter);
     }
 
 }

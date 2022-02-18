@@ -5,7 +5,11 @@ import com.example.printifybackend.jdbi.LazyDataModel;
 import com.example.printifybackend.order.dto.DtoOrder;
 import com.example.printifybackend.order.dto.DtoRequestOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping("/order")
@@ -24,8 +28,13 @@ public class ControllerOrder {
     }
 
     @PostMapping("/get")
-    public LazyDataModel getWithCriteria(@RequestBody LazyCriteria lazyCriteria) {
-        return this.serviceOrder.getWithCriteria(lazyCriteria);
+    public ResponseEntity<List<DtoOrder>> getWithCriteria(@RequestBody LazyCriteria lazyCriteria) {
+        return ResponseEntity.ok(this.serviceOrder.getWithCriteria(lazyCriteria));
+    }
+
+    @PostMapping("/count")
+    public Long countWithCriteria(@RequestBody LinkedHashMap<String, Object> filter) {
+        return this.serviceOrder.count(filter);
     }
 
     @PostMapping("/save")
