@@ -35,6 +35,7 @@ public class ServiceOrder {
         EntityOrder entityOrder = Converter.convert(order, EntityOrder.class);
         if (entityOrder == null) return;
         entityOrder.setDate(LocalDateTime.now());
+        entityOrder.setFinished(false);
 
         this.daoOrder.insert(entityOrder);
     }
