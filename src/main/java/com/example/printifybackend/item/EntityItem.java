@@ -35,4 +35,7 @@ public class EntityItem extends BaseEntity {
     @Column(name = "image_id")
     @ManyToOne(targetEntity = EntityBinaryObject.class)
     private Long imageId;
+
+    @Column(name = "internet_visible")
+    private Boolean internetVisible;
 }

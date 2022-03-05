@@ -36,6 +36,20 @@ public class DaoItem extends BaseDao<EntityItem> {
         );
     }
 
+    public List<JoinedEntity> findInternetVisibleWithImages() {
+        return this.jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.internet_visible")
+                        .reduceRows(
+                                new JoinedEntityRowReducer(
+                                        EntityItem.class,
+                                        "item",
+                                        Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                                ))
+                        .collect(Collectors.toList())
+        );
+    }
+
     public JoinedEntity findByUuidWithImage(String uuid) {
         return this.jdbi.withHandle(handle ->
                 handle

@@ -14,3 +14,7 @@ spring:
     hikari:
       connectionTimeout: 20000
       maximumPoolSize: 5
+#
+#
+#  thymeleaf:
+#    prefix: /home/samuel/IdeaProjects/printify-backend/printify-backend/target/classes/static

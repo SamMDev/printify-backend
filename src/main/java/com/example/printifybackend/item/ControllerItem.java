@@ -21,6 +21,11 @@ public class ControllerItem {
         return this.serviceItem.findAllWithImages();
     }
 
+    @GetMapping("/internet-visible")
+    public List<DtoItem> findInternetVisible() {
+        return this.serviceItem.findInternetVisibleWithImages();
+    }
+
     @GetMapping("/uuid/{uuid}")
     public DtoItem findByUuid(@PathVariable("uuid") String uuid) {
         return this.serviceItem.findByUuidWithImage(uuid);

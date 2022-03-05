@@ -66,7 +66,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/auth/sign-up").permitAll()
 
                 // Our public endpoints
-                .antMatchers(HttpMethod.GET, "/item/all").permitAll()
+                .antMatchers(HttpMethod.GET, "/item/all").hasAnyAuthority("ADD_PRODUCTS", "MANAGE_ORDERS", "SHOW_ORDERS")
+                .antMatchers(HttpMethod.GET, "/item/internet-visible").permitAll()
                 .antMatchers(HttpMethod.POST, "/order/get").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
 
                 .antMatchers(HttpMethod.POST, "/auth/sign-up").permitAll()

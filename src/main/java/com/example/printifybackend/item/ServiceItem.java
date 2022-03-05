@@ -28,6 +28,13 @@ public class ServiceItem {
                 .collect(Collectors.toList());
     }
 
+    public List<DtoItem> findInternetVisibleWithImages() {
+        return this.daoItem.findInternetVisibleWithImages()
+                .stream()
+                .map(e -> Converter.convertJoined(e, DtoItem.class))
+                .collect(Collectors.toList());
+    }
+
     public List<DtoItem> findByUuidsWithImages(List<String> uuids) {
         if (uuids == null || uuids.isEmpty()) return Collections.emptyList();
         return this.daoItem.findByUuidsWithImages(uuids)
