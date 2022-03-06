@@ -69,6 +69,14 @@ public class ServiceOrder {
         return this.daoOrder.totalRowCount(filter);
     }
 
+    public void editFinalization(Long id, boolean newValue) {
+        EntityOrder order = this.daoOrder.findById(id);
+        if (order == null) return;
+
+        order.setFinished(newValue);
+        this.daoOrder.update(order);
+    }
+
     /**
      * Reads serialized form of orders and returns list of order items
      *

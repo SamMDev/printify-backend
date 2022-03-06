@@ -1,7 +1,6 @@
 package com.example.printifybackend.order;
 
 import com.example.printifybackend.jdbi.LazyCriteria;
-import com.example.printifybackend.jdbi.LazyDataModel;
 import com.example.printifybackend.order.dto.DtoOrder;
 import com.example.printifybackend.order.dto.DtoOrderDetail;
 import com.example.printifybackend.order.dto.DtoRequestOrder;
@@ -26,6 +25,16 @@ public class ControllerOrder {
     @PostMapping("/id/{id}")
     public DtoOrderDetail getById(@PathVariable("id") Long id) {
         return this.serviceOrder.getDetailById(id);
+    }
+
+    @PostMapping("/finalize/id/{id}")
+    public void finalizeById(@PathVariable("id") Long id) {
+        this.serviceOrder.editFinalization(id, true);
+    }
+
+    @PostMapping("/un-finalize/id/{id}")
+    public void unFinalizeById(@PathVariable("id") Long id) {
+        this.serviceOrder.editFinalization(id, false);
     }
 
     @PostMapping("/get")
