@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class BaseDao<E extends BaseEntity> {
+public abstract class BaseDao<E extends BaseEntity> {
     private static final String INSERT_ENTITY_TEMPLATE = "INSERT INTO <NAME> (<COLUMNS>) VALUES (<VALUES>)";
     private static final String UPDATE_ENTITY_TEMPLATE = "UPDATE <NAME> SET <SET> WHERE id = :id";
     private static final String DELETE_BY_ID_TEMPLATE = "DELETE FROM <NAME> WHERE id = :id";
@@ -103,11 +103,7 @@ public class BaseDao<E extends BaseEntity> {
                 (offset != null ? " OFFSET " + offset : "");
     }
 
-    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
-        return "";
-    }
+    public abstract String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind);
 
-    public Long totalRowCount(Map<String, Object> filters) {
-        return 0L;
-    }
+    public abstract Long totalRowCount(Map<String, Object> filters);
 }

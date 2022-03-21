@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
@@ -78,5 +79,15 @@ public class DaoItem extends BaseDao<EntityItem> {
                                 ))
                         .collect(Collectors.toList())
         );
+    }
+
+    @Override
+    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
+        return null;
+    }
+
+    @Override
+    public Long totalRowCount(Map<String, Object> filters) {
+        return null;
     }
 }
