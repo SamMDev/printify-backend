@@ -78,16 +78,16 @@ public class Converter {
         final List<Method> dtoClazzSetters = Arrays
                 .stream(dtoClazz.getMethods())
                 .filter(m -> m.getName().startsWith("set"))
-                .collect(Collectors.toList());
+                .toList();
 
         // for each entity in joined entity
-        for (String clazzName : joined.keySet()) {
+        for (Class<?> clazz : joined.keySet()) {
 
-            Object entity = joined.get(clazzName);
+            Object entity = joined.get(clazz);
             final List<Method> entityGetters = Arrays
                     .stream(entity.getClass().getDeclaredMethods())
                     .filter(m -> m.getName().startsWith("get"))
-                    .collect(Collectors.toList());
+                    .toList();
 
             for (Method entityGetter : entityGetters) {
                 // find dto setter for current entity getter

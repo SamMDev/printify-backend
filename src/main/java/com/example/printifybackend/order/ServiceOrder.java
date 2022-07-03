@@ -65,7 +65,7 @@ public class ServiceOrder {
                 .collect(Collectors.toList());
     }
 
-    public Long count(LinkedHashMap<String, Object> filter) {
+    public Long count(Map<String, Object> filter) {
         return this.daoOrder.totalRowCount(filter);
     }
 

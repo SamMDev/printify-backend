@@ -5,7 +5,6 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
 
 @Repository
 public class DaoUser extends BaseDao<EntityUser> {
@@ -43,13 +42,4 @@ public class DaoUser extends BaseDao<EntityUser> {
         );
     }
 
-    @Override
-    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
-        return null;
-    }
-
-    @Override
-    public Long totalRowCount(Map<String, Object> filters) {
-        return null;
-    }
 }

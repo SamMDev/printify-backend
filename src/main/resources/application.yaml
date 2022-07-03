@@ -8,7 +8,7 @@ jwt:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/printify
-    username: postgres
+    username: samuel
     password: helloworld
 
     hikari:

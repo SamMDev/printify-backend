@@ -6,55 +6,42 @@ import com.example.printifybackend.jdbi.EntityRowMapper;
 import com.example.printifybackend.order.EntityOrder;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapperFactory;
+import org.jdbi.v3.postgres.PostgresPlugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 @Configuration
 public class JdbiConfig {
 
-    private DataSource dataSource;
-
-    @Value("${spring.datasource.url}")
-    private String url;
-
-    @Value("${spring.datasource.username}")
-    private String username;
-
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    private Jdbi jdbi;
-
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource driverManagerDataSource() {
-        DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
-        driverManagerDataSource.setUrl(this.url);
-        driverManagerDataSource.setUsername(this.username);
-        driverManagerDataSource.setPassword(this.password);
-        return driverManagerDataSource;
-    }
-
-    @PostConstruct
-    private void init() {
-        this.dataSource = this.driverManagerDataSource();
-        this.jdbi = Jdbi.create(this.dataSource);
-        this.jdbi.installPlugin(new SqlObjectPlugin());
-
-        this.jdbi.registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)));
-        this.jdbi.registerRowMapper(RowMapperFactory.of(EntityBinaryObject.class, new EntityRowMapper<>(EntityBinaryObject.class)));
-        this.jdbi.registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)));
-        this.jdbi.registerRowMapper(RowMapperFactory.of(EntityOrder.class, new EntityRowMapper<>(EntityOrder.class)));
+        return new DriverManagerDataSource();
     }
 
     @Bean
-    public Jdbi getJdbi() {
-        return this.jdbi;
+    public DataSourceTransactionManager dataSourceTransactionManager(DataSource dataSource) {
+        DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+        dataSourceTransactionManager.setDataSource(dataSource);
+        return dataSourceTransactionManager;
+    }
+
+    @Bean
+    public Jdbi jdbi(DataSource dataSource) {
+        return Jdbi.create(dataSource)
+                .installPlugin(new SqlObjectPlugin())
+                .installPlugin(new PostgresPlugin())
+                // here goes all the row mappers
+                .registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)))
+                .registerRowMapper(RowMapperFactory.of(EntityBinaryObject.class, new EntityRowMapper<>(EntityBinaryObject.class)))
+                .registerRowMapper(RowMapperFactory.of(EntityOrder.class, new EntityRowMapper<>(EntityOrder.class)))
+                ;
     }
 
 }

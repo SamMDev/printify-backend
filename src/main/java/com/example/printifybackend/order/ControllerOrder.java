@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/order")
@@ -43,7 +43,7 @@ public class ControllerOrder {
     }
 
     @PostMapping("/count")
-    public Long countWithCriteria(@RequestBody LinkedHashMap<String, Object> filter) {
+    public Long countWithCriteria(@RequestBody Map<String, Object> filter) {
         return this.serviceOrder.count(filter);
     }
 

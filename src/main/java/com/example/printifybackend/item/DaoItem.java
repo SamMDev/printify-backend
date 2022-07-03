@@ -2,12 +2,12 @@ package com.example.printifybackend.item;
 
 import com.example.printifybackend.binary_obj.EntityBinaryObject;
 import com.example.printifybackend.jdbi.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
@@ -28,10 +28,9 @@ public class DaoItem extends BaseDao<EntityItem> {
              handle
                    .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id")
                    .reduceRows(
-                           new JoinedEntityRowReducer(
+                           new JoinEntityRowReducer<>(
                                    EntityItem.class,
-                                   "item",
-                                   Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                                   Pair.of(EntityBinaryObject.class, JoinedEntity.JoinType.ONE_TO_ONE)
                            ))
                    .collect(Collectors.toList())
         );
@@ -42,10 +41,9 @@ public class DaoItem extends BaseDao<EntityItem> {
                 handle
                         .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.internet_visible")
                         .reduceRows(
-                                new JoinedEntityRowReducer(
+                                new JoinEntityRowReducer<>(
                                         EntityItem.class,
-                                        "item",
-                                        Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                                        Pair.of(EntityBinaryObject.class, JoinedEntity.JoinType.ONE_TO_ONE)
                                 ))
                         .collect(Collectors.toList())
         );
@@ -57,10 +55,9 @@ public class DaoItem extends BaseDao<EntityItem> {
                         .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.uuid = :uuid")
                         .bind("uuid", uuid)
                         .reduceRows(
-                                new JoinedEntityRowReducer(
+                                new JoinEntityRowReducer<>(
                                         EntityItem.class,
-                                        "item",
-                                        Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                                        Pair.of(EntityBinaryObject.class, JoinedEntity.JoinType.ONE_TO_ONE)
                                 ))
                         .findFirst().orElse(null)
         );
@@ -72,22 +69,12 @@ public class DaoItem extends BaseDao<EntityItem> {
                         .createQuery("SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id WHERE item.uuid IN (<uuids>)")
                         .bindList("uuids", uuids)
                         .reduceRows(
-                                new JoinedEntityRowReducer(
+                                new JoinEntityRowReducer<>(
                                         EntityItem.class,
-                                        "item",
-                                        Join.oneToOneEntity(EntityBinaryObject.class, "binary_obj")
+                                        Pair.of(EntityBinaryObject.class, JoinedEntity.JoinType.ONE_TO_ONE)
                                 ))
                         .collect(Collectors.toList())
         );
     }
 
-    @Override
-    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
-        return null;
-    }
-
-    @Override
-    public Long totalRowCount(Map<String, Object> filters) {
-        return null;
-    }
 }

@@ -15,13 +15,4 @@ public class DaoBinaryObject extends BaseDao<EntityBinaryObject> {
         super(EntityBinaryObject.class, jdbi);
     }
 
-    @Override
-    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
-        return null;
-    }
-
-    @Override
-    public Long totalRowCount(Map<String, Object> filters) {
-        return null;
-    }
 }

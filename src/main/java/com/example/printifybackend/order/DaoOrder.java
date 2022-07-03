@@ -1,15 +1,14 @@
 package com.example.printifybackend.order;
 
 import com.example.printifybackend.jdbi.BaseDao;
+import com.example.printifybackend.jdbi.DaoFilterQueryBuilder;
 import com.example.printifybackend.jdbi.LazyCriteria;
-import com.example.printifybackend.jdbi.WhereConditionBuilder;
 import com.example.printifybackend.utils.DateUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,65 +21,69 @@ public class DaoOrder extends BaseDao<EntityOrder> {
     }
 
     public List<EntityOrder> getOrdersWithCriteria(LazyCriteria lazyCriteria) {
-        final Map<String, Object> bind = new HashMap<>();
-
-        String whereStatement = this.buildWhereStatement(lazyCriteria.getFilter(), bind);
-        String order = " ORDER BY date desc ";
-        String offsetLimit = this.buildLimitOffsetStatement(lazyCriteria.getLimit(), lazyCriteria.getOffset());
+        final DaoFilterQueryBuilder orderQueryBuilder = new OrderQueryBuilder("SELECT * FROM printify.order ");
+        orderQueryBuilder.buildWhereStatement(lazyCriteria.getFilter());
+        orderQueryBuilder.buildLimitOffsetStatement(lazyCriteria.getLimit(), lazyCriteria.getOffset());
+        orderQueryBuilder.setOrderStatement("ORDER BY date desc");
 
         return this.jdbi.withHandle(
                 handle ->
-                        handle.createQuery("SELECT * FROM printify.order " + whereStatement + order + offsetLimit)
-                                .bindMap(bind)
+                        handle.createQuery(orderQueryBuilder.build())
+                                .bindMap(orderQueryBuilder.getBind())
                                 .mapTo(EntityOrder.class)
                                 .list()
         );
     }
 
-    @Override
-    public String buildWhereStatement(Map<String, Object> filters, Map<String, Object> bind) {
-
-        if (filters == null || filters.isEmpty()) return "";
-
-        final WhereConditionBuilder whereConditionBuilder = new WhereConditionBuilder();
-
-        if (filters.containsKey("finished")) {
-            Boolean value = (Boolean) filters.get("finished");
-            bind.put("finished", value);
-            whereConditionBuilder.addCondition(" (finished = :finished) ");
-        }
-
-        if (filters.containsKey("fromDate")) {
-            final LocalDateTime startOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("fromDate"));
-            if (startOfDay != null) {
-                bind.put("fromDate", startOfDay);
-                whereConditionBuilder.addCondition(" (date >= :fromDate) ");
-            }
-        }
-
-        if (filters.containsKey("toDate")) {
-            final LocalDateTime endOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("toDate"));
-            if (endOfDay != null) {
-                bind.put("toDate", endOfDay);
-                whereConditionBuilder.addCondition( " (date <= :toDate) " );
-            }
-        }
-
-        return whereConditionBuilder.buildWhere();
-    }
-
-    @Override
     public Long totalRowCount(Map<String, Object> filters) {
-
-        final Map<String, Object> bind = new HashMap<>();
-        final String whereStatement = this.buildWhereStatement(filters, bind);
+        final DaoFilterQueryBuilder orderQueryBuilder = new OrderQueryBuilder("SELECT count(*) FROM printify.order ");
+        orderQueryBuilder.buildWhereStatement(filters);
 
         return this.jdbi.withHandle(
                 handle -> handle
-                        .createQuery("SELECT count(*) FROM printify.order " + whereStatement)
-                        .bindMap(bind)
+                        .createQuery(orderQueryBuilder.build())
+                        .bindMap(orderQueryBuilder.getBind())
                         .mapTo(Long.class)
                         .one()
         );
+    }
+
+    public static class OrderQueryBuilder extends DaoFilterQueryBuilder {
+
+        public OrderQueryBuilder(String select) {
+            super(select);
+        }
+
+        @Override
+        public void buildWhereStatement(Map<String, Object> filters) {
+            if (filters == null || filters.isEmpty()) return;
+
+            final WhereConditionBuilder whereConditionBuilder = new WhereConditionBuilder();
+
+            if (filters.containsKey("finished")) {
+                Boolean value = (Boolean) filters.get("finished");
+                super.getBind().put("finished", value);
+                whereConditionBuilder.addCondition(" (finished = :finished) ");
+            }
+
+            if (filters.containsKey("fromDate")) {
+                final LocalDateTime startOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("fromDate"));
+                if (startOfDay != null) {
+                    super.getBind().put("fromDate", startOfDay);
+                    whereConditionBuilder.addCondition(" (date >= :fromDate) ");
+                }
+            }
+
+            if (filters.containsKey("toDate")) {
+                final LocalDateTime endOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("toDate"));
+                if (endOfDay != null) {
+                    super.getBind().put("toDate", endOfDay);
+                    whereConditionBuilder.addCondition( " (date <= :toDate) " );
+                }
+            }
+
+            super.setWhereStatement(whereConditionBuilder.buildWhere());
+        }
+
     }
 }
