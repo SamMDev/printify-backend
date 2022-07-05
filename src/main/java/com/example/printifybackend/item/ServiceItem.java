@@ -35,6 +35,13 @@ public class ServiceItem extends AbstractEntityService<EntityItem, DaoItem> {
                 .toList();
     }
 
+    public List<DtoItem> findInternetVisibleWithImages(String searchBy) {
+        return this.dao.findInternetVisibleWithImages(searchBy)
+                .stream()
+                .map(e -> Converter.convertJoined(e, DtoItem.class))
+                .toList();
+    }
+
     public List<DtoItem> findByUuidsWithImages(List<String> uuids) {
         if (uuids == null || uuids.isEmpty()) return Collections.emptyList();
         return this.dao.findByUuidsWithImages(uuids)
