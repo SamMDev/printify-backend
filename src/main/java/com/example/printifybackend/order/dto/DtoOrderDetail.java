@@ -8,6 +8,7 @@ import java.util.List;
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+
 /**
  * Order detail must have all the information from order,
  * but also contains list of order items of given order

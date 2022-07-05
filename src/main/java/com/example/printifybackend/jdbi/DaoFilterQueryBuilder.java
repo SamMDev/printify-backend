@@ -32,7 +32,7 @@ public abstract class DaoFilterQueryBuilder {
     @Getter
     private String limitOffsetStatement;
 
-    public DaoFilterQueryBuilder(String select) {
+    protected DaoFilterQueryBuilder(String select) {
         this.select = select;
         this.bind = new HashMap<>();
     }

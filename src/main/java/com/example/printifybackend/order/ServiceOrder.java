@@ -1,5 +1,6 @@
 package com.example.printifybackend.order;
 
+import com.example.printifybackend.AbstractEntityService;
 import com.example.printifybackend.Converter;
 import com.example.printifybackend.item.DaoItem;
 import com.example.printifybackend.item.DtoItem;
@@ -21,13 +22,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ServiceOrder {
+public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
 
-    private final DaoOrder daoOrder;
     private final ServiceItem serviceItem;
     @Autowired
     public ServiceOrder(DaoOrder daoOrder, ServiceItem serviceItem) {
-        this.daoOrder = daoOrder;
+        super(daoOrder);
         this.serviceItem = serviceItem;
     }
 
@@ -37,7 +37,7 @@ public class ServiceOrder {
         entityOrder.setDate(LocalDateTime.now());
         entityOrder.setFinished(false);
 
-        this.daoOrder.insert(entityOrder);
+        this.dao.insert(entityOrder);
     }
 
     /**
@@ -47,7 +47,7 @@ public class ServiceOrder {
      * @return      detail object
      */
     public DtoOrderDetail getDetailById(Long id) {
-        EntityOrder order = this.daoOrder.findById(id);
+        EntityOrder order = this.dao.findById(id);
         if (order == null) return null;
 
         DtoOrderDetail detail = Converter.convert(order, DtoOrderDetail.class);
@@ -59,22 +59,22 @@ public class ServiceOrder {
 
     public List<DtoOrder> getWithCriteria(LazyCriteria lazyCriteria) {
         return
-                this.daoOrder.getOrdersWithCriteria(lazyCriteria)
+                this.dao.getOrdersWithCriteria(lazyCriteria)
                 .stream()
                 .map(o -> Converter.convert(o, DtoOrder.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Long count(Map<String, Object> filter) {
-        return this.daoOrder.totalRowCount(filter);
+        return this.dao.totalRowCount(filter);
     }
 
     public void editFinalization(Long id, boolean newValue) {
-        EntityOrder order = this.daoOrder.findById(id);
+        EntityOrder order = this.dao.findById(id);
         if (order == null) return;
 
         order.setFinished(newValue);
-        this.daoOrder.update(order);
+        this.dao.update(order);
     }
 
     /**
@@ -110,7 +110,7 @@ public class ServiceOrder {
                 }
         )
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Data

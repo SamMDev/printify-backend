@@ -8,17 +8,20 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Converter used for mapping between objects
  * @author SamMDev
  */
+@SuppressWarnings("squid:S1118")    // no need to have private constructor
+@Slf4j
 public class Converter {
 
     @Getter
@@ -81,9 +84,9 @@ public class Converter {
                 .toList();
 
         // for each entity in joined entity
-        for (Class<?> clazz : joined.keySet()) {
+        for (Map.Entry<Class<?>, Object> entry : joined.entrySet()) {
 
-            Object entity = joined.get(clazz);
+            Object entity = entry.getValue();
             final List<Method> entityGetters = Arrays
                     .stream(entity.getClass().getDeclaredMethods())
                     .filter(m -> m.getName().startsWith("get"))
@@ -100,7 +103,9 @@ public class Converter {
                 try {
                     // map value from entity getter to dto setter
                     dtoSetter.invoke(dto, entityGetter.invoke(entity));
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    log.warn(String.format("Could not map set value with setter %s in class %s", dtoSetter.getName(), dtoClazz.getName()), e);
+                }
             }
         }
         return (C) dto;

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Getter @Setter
 @Entity
 @Table(name = "user", schema = "printify")
+@SuppressWarnings("squid:S2160")
 public class EntityUser extends BaseEntity {
 
     @Column(name = "username", length = 50)
@@ -66,10 +67,10 @@ public class EntityUser extends BaseEntity {
      * @return  privileges
      */
     public Set<Privilege> getAllPrivileges() {
-        final Set<Privilege> privileges = new HashSet<>(this.deserializeUserPrivileges());
+        final Set<Privilege> privilegesSet = new HashSet<>(this.deserializeUserPrivileges());
         for (Role role : this.deserializeUserRoles()) {
-            privileges.addAll(role.getPrivileges());
+            privilegesSet.addAll(role.getPrivileges());
         }
-        return privileges;
+        return privilegesSet;
     }
 }

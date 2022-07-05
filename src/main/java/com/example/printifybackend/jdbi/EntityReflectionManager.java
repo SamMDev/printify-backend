@@ -82,8 +82,8 @@ public class EntityReflectionManager {
                 // save every field
                 this.fields.add(field);
 
-                // save column annotated fields
-                if (field.getAnnotation(Column.class) != null) {
+                // save column annotated fields (also field annotated with @Id is mapped field)
+                if (field.getAnnotation(Column.class) != null || field.getAnnotation(Id.class) != null) {
                     this.columnAnnotatedField.add(field);
                     // instead of ID field
                     if (field.getAnnotation(Id.class) == null) this.columnNamesWithoutId.add(field.getName());

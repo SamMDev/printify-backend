@@ -3,6 +3,7 @@ package com.example.printifybackend.utils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@SuppressWarnings("squid:S1118")
 public class DateUtils {
 
     private static final DateTimeFormatter jsDateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");

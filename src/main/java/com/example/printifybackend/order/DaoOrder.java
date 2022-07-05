@@ -60,24 +60,27 @@ public class DaoOrder extends BaseDao<EntityOrder> {
 
             final WhereConditionBuilder whereConditionBuilder = new WhereConditionBuilder();
 
-            if (filters.containsKey("finished")) {
-                Boolean value = (Boolean) filters.get("finished");
-                super.getBind().put("finished", value);
+            final String finishedKey = "finished";
+            if (filters.containsKey(finishedKey)) {
+                Boolean value = (Boolean) filters.get(finishedKey);
+                super.getBind().put(finishedKey, value);
                 whereConditionBuilder.addCondition(" (finished = :finished) ");
             }
 
-            if (filters.containsKey("fromDate")) {
-                final LocalDateTime startOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("fromDate"));
+            final String fromDateKey = "fromDate";
+            if (filters.containsKey(fromDateKey)) {
+                final LocalDateTime startOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get(fromDateKey));
                 if (startOfDay != null) {
-                    super.getBind().put("fromDate", startOfDay);
+                    super.getBind().put(fromDateKey, startOfDay);
                     whereConditionBuilder.addCondition(" (date >= :fromDate) ");
                 }
             }
 
-            if (filters.containsKey("toDate")) {
-                final LocalDateTime endOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get("toDate"));
+            final String toDateKey = "toDate";
+            if (filters.containsKey(toDateKey)) {
+                final LocalDateTime endOfDay = DateUtils.jsDateToLocalDateTime((String) filters.get(toDateKey));
                 if (endOfDay != null) {
-                    super.getBind().put("toDate", endOfDay);
+                    super.getBind().put(toDateKey, endOfDay);
                     whereConditionBuilder.addCondition( " (date <= :toDate) " );
                 }
             }

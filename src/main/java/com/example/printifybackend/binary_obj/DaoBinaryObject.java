@@ -5,8 +5,6 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
-
 @Repository
 public class DaoBinaryObject extends BaseDao<EntityBinaryObject> {
 

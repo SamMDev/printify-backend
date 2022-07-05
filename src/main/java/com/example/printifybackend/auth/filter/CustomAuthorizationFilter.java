@@ -56,7 +56,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             DecodedJWT decodedJWT = verifier.verify(token);
             String username = decodedJWT.getSubject();
             String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
-            Collection<GrantedAuthority> grantedAuthorities = Arrays.stream(roles).map(Privilege::valueOf).collect(Collectors.toList());
+            List<Privilege> grantedAuthorities = Arrays.stream(roles).map(Privilege::valueOf).toList();
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -64,11 +64,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             response.setHeader("error", e.getMessage());
             response.setStatus(FORBIDDEN.value());
-            Map<String, String> error = new HashMap<>(){
-                {
-                    put("error_message", e.getMessage());
-                }
-            };
+            Map<String, String> error = new HashMap<>();
+            error.put("error_message", e.getMessage());
             response.setContentType(APPLICATION_JSON_VALUE);
             Converter.getObjectMapper().writeValue(response.getOutputStream(), error);
         }

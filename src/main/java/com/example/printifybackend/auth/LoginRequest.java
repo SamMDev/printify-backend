@@ -1,6 +1,5 @@
 package com.example.printifybackend.auth;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

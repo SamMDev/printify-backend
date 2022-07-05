@@ -1,9 +1,7 @@
 package com.example.printifybackend.auth;
 
-import com.example.printifybackend.user.DaoUser;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;

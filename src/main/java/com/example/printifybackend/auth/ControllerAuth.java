@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -43,9 +41,8 @@ public class ControllerAuth {
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("No refresh token");
-        }
+        if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Bearer ")) throw new IllegalArgumentException("No refresh token");
+
         String refreshToken = authHeader.substring("Bearer ".length());
         Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
         JWTVerifier verifier = JWT.require(algorithm).build();
@@ -56,20 +53,17 @@ public class ControllerAuth {
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
                 .withIssuer(request.getRequestURL().toString())
-                .withClaim("roles", this.serviceUser.getPrivilegesForUser(user).stream().map(Privilege::name).collect(Collectors.toList()))
+                .withClaim("roles", this.serviceUser.getPrivilegesForUser(user).stream().map(Privilege::name).toList())
                 .sign(algorithm);
-        Map<String, String> tokenMap = new HashMap<>(){
-            {
-                put("access_token", accessToken);
-                put("refresh_token", refreshToken);
-            }
-        };
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("access_token", accessToken);
+        tokenMap.put("refresh_token", refreshToken);
         response.setContentType(APPLICATION_JSON_VALUE);
         Converter.getObjectMapper().writeValue(response.getOutputStream(), tokenMap);
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpRequest request) {
+    public ResponseEntity<MessageResponse> registerUser(@RequestBody SignUpRequest request) {
         final String username = request.getUsername();
         final String password = request.getPassword();
 
@@ -94,7 +88,7 @@ public class ControllerAuth {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<DtoPrincipal> authenticateUser(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));

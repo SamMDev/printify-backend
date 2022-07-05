@@ -11,6 +11,7 @@ import java.util.List;
  * @param <E> entity clazz
  * @author Samuel Molčan
  */
+@SuppressWarnings("squid:S1192")
 public abstract class BaseDao<E extends BaseEntity> {
     private static final String INSERT_ENTITY_TEMPLATE = "INSERT INTO <NAME> (<COLUMNS>) VALUES (<VALUES>)";
     private static final String UPDATE_ENTITY_TEMPLATE = "UPDATE <NAME> SET <SET> WHERE id = :id";

@@ -9,12 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DaoUser extends BaseDao<EntityUser> {
 
-    private final Jdbi jdbi;
-
     @Autowired
     public DaoUser(Jdbi jdbi) {
         super(EntityUser.class, jdbi);
-        this.jdbi = jdbi;
     }
 
     /**
