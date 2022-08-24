@@ -6,10 +6,7 @@ import com.example.printifybackend.jdbi.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Getter @Setter
@@ -36,6 +33,14 @@ public class EntityItem extends BaseEntity {
     @ManyToOne(targetEntity = EntityBinaryObject.class)
     private Long imageId;
 
+    @Column(name = "file_id")
+    @ManyToOne(targetEntity = EntityBinaryObject.class)
+    private Long fileId;
+
     @Column(name = "internet_visible")
     private Boolean internetVisible;
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private ItemType type;
 }

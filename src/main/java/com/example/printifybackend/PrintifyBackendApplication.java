@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-public class CoderamaBackendApplication {
+public class PrintifyBackendApplication {
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -26,7 +26,7 @@ public class CoderamaBackendApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(CoderamaBackendApplication.class, args);
+        SpringApplication.run(PrintifyBackendApplication.class, args);
     }
 
 }

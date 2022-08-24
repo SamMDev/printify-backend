@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  *
  * @author SamMDev
@@ -20,11 +22,8 @@ public class ServiceUserAuth implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        EntityUser user = this.daoUser.findByUsername(username);
-
-        if (user == null)
-            throw new UsernameNotFoundException("User with username " + username + " not found");
-
-        return new CustomizedUserDetails(user);
+        return Optional.ofNullable(this.daoUser.findByUsername(username))
+                .map(CustomizedUserDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User with username " + username + " not found"));
     }
 }

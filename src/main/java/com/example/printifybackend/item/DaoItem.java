@@ -68,7 +68,7 @@ public class DaoItem extends BaseDao<EntityItem> {
                 handle
                         .createQuery(
                             """
-                            SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id 
+                            SELECT * FROM printify.item LEFT OUTER JOIN printify.binary_obj ON item.image_id = binary_obj.id
                             WHERE item.internet_visible AND item.name ILIKE '%' || :searchBy || '%'
                             """)
                         .bind("searchBy", searchBy)
@@ -91,6 +91,16 @@ public class DaoItem extends BaseDao<EntityItem> {
                                         EntityItem.class,
                                         Pair.of(EntityBinaryObject.class, JoinedEntity.JoinType.ONE_TO_ONE)
                                 ))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    public List<EntityItem> findByUuids(List<String> uuids) {
+        return this.jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * FROM printify.item WHERE item.uuid IN (<uuids>)")
+                        .bindList("uuids", uuids)
+                        .mapTo(EntityItem.class)
                         .collect(Collectors.toList())
         );
     }

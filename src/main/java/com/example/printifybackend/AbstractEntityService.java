@@ -21,8 +21,8 @@ public abstract class AbstractEntityService<E extends BaseEntity, D extends Base
         this.dao = dao;
     }
 
-    public void insert(E entity) {
-        this.dao.insert(entity);
+    public Long insert(E entity) {
+        return this.dao.insert(entity);
     }
 
     public void update(E entity) {

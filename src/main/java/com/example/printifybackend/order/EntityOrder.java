@@ -1,52 +1,33 @@
 package com.example.printifybackend.order;
 
+import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.jdbi.BaseEntity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+@Builder
 @Getter
 @Setter
 @Entity
 @Table(name = "order", schema = "printify")
 public class EntityOrder extends BaseEntity {
 
-    @Column(name = "firstname", length = 100)
-    private String firstName;
+    @ManyToOne(targetEntity = EntityContactInfo.class)
+    @Column(name = "contact_info", nullable = false)
+    private Long contactInfo;
 
-    @Column(name = "lastname", length = 100)
-    private String lastName;
-
-    @Column(name = "email", length = 200)
-    private String email;
-
-    @Column(name = "street", length = 100)
-    private String street;
-
-    @Column(name = "city", length = 100)
-    private String city;
-
-    @Column(name = "postcode", length = 10)
-    private String postCode;
-
-    @Column(name = "phone", length = 20)
-    private String phone;
-
-    @Column(name = "date")
-    private LocalDateTime date;
-
-    @Column(name = "content", length = 10000)
-    private String content;
-
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
 
-    @Column(name = "finished")
-    private Boolean finished;
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
+    @Column(name = "pay_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderPayStatus payStatus;
 }

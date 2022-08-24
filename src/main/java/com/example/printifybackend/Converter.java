@@ -11,10 +11,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Converter used for mapping between objects
@@ -60,7 +57,7 @@ public class Converter {
     }
 
     /**
-     * Maps joined entity into one DTO object
+     * Maps joined entity with oneToOne relation into one DTO object
      * Unrecognized fields are skipped
      *
      * @param joined    joined entity
@@ -68,10 +65,12 @@ public class Converter {
      * @param <C>       type of dto class
      * @return          dto class object mapped
      */
-    public static <C> C convertJoined(JoinedEntity joined, Class<C> dtoClazz) {
+    public static <C> C accumulateJoinedToDto(JoinedEntity joined, Class<C> dtoClazz) {
         if (joined == null || dtoClazz == null) return null;
+        if (joined.entrySet().stream().anyMatch(entry -> entry.getValue() instanceof Collection<?>))
+            throw new IllegalArgumentException("When accumulating joined entity into one dto, all the relations in joined entity must be one-to-one");
 
-        Object dto;
+        C dto;
         try {
             dto = dtoClazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -108,7 +107,7 @@ public class Converter {
                 }
             }
         }
-        return (C) dto;
+        return dto;
     }
 
 }

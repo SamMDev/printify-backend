@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class DaoOrder extends BaseDao<EntityOrder> {
+public class DaoOrderItem extends BaseDao<EntityOrderItem> {
 
     @Autowired
-    public DaoOrder(Jdbi jdbi) {
-        super(EntityOrder.class, jdbi);
+    public DaoOrderItem(Jdbi jdbi) {
+        super(EntityOrderItem.class, jdbi);
     }
 }

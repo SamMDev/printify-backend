@@ -14,6 +14,10 @@ spring:
     hikari:
       connectionTimeout: 20000
       maximumPoolSize: 5
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 #
 #
 #  thymeleaf:

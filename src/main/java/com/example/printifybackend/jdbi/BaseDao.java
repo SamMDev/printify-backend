@@ -61,8 +61,8 @@ public abstract class BaseDao<E extends BaseEntity> {
                 .replace("<NAME>", TABLE_NAME);
     }
 
-    public void insert(E entity) {
-        this.jdbi.withHandle(handle -> handle.createUpdate(insertEntityQuery).bindBean(entity).execute());
+    public Long insert(E entity) {
+        return this.jdbi.withHandle(handle -> handle.createUpdate(insertEntityQuery).bindBean(entity).executeAndReturnGeneratedKeys().mapTo(Long.class).one());
     }
 
     public void update(E entity) {

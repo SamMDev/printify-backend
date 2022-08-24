@@ -204,7 +204,7 @@
 <!--				<artifactId>spring-boot-maven-plugin</artifactId>-->
 <!--				<configuration>-->
 <!--					<fork>true</fork>-->
-<!--					<mainClass>com.example.printifybackend.CoderamaBackendApplication</mainClass>-->
+<!--					<mainClass>com.example.printifybackend.PrintifyBackendApplication</mainClass>-->
 <!--				</configuration>-->
 <!--				<executions>-->
 <!--					<execution>-->

@@ -2,122 +2,94 @@ package com.example.printifybackend.order;
 
 import com.example.printifybackend.AbstractEntityService;
 import com.example.printifybackend.Converter;
-import com.example.printifybackend.item.DaoItem;
-import com.example.printifybackend.item.DtoItem;
+import com.example.printifybackend.contact_into.EntityContactInfo;
+import com.example.printifybackend.contact_into.ServiceContactInfo;
+import com.example.printifybackend.item.EntityItem;
 import com.example.printifybackend.item.ServiceItem;
-import com.example.printifybackend.jdbi.JoinedEntity;
-import com.example.printifybackend.jdbi.LazyCriteria;
 import com.example.printifybackend.order.dto.DtoOrder;
-import com.example.printifybackend.order.dto.DtoOrderDetail;
-import com.example.printifybackend.order.dto.DtoRequestOrder;
-import com.example.printifybackend.order.dto.DtoSingleOrderItem;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import com.example.printifybackend.order.dto.DtoOrderItem;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
 
+    private final ServiceContactInfo serviceContactInfo;
+    private final ServiceOrder serviceOrder;
+    private final ServiceOrderItem serviceOrderItem;
     private final ServiceItem serviceItem;
+
     @Autowired
-    public ServiceOrder(DaoOrder daoOrder, ServiceItem serviceItem) {
-        super(daoOrder);
+    public ServiceOrder(DaoOrder dao, ServiceContactInfo serviceContactInfo, ServiceOrder serviceOrder, ServiceOrderItem serviceOrderItem, ServiceItem serviceItem) {
+        super(dao);
+        this.serviceContactInfo = serviceContactInfo;
+        this.serviceOrder = serviceOrder;
+        this.serviceOrderItem = serviceOrderItem;
         this.serviceItem = serviceItem;
     }
 
-    public void saveOrder(DtoRequestOrder order) {
-        EntityOrder entityOrder = Converter.convert(order, EntityOrder.class);
-        if (entityOrder == null) return;
-        entityOrder.setDate(LocalDateTime.now());
-        entityOrder.setFinished(false);
+    public void createOrder(DtoOrder order) {
+        // none of these objects can be null
+        if (order == null || ObjectUtils.anyNull(order.getItems(), order.getContactInfo())) return;
 
-        this.dao.insert(entityOrder);
+        // first save contact info
+        final Long contactInfoId = this.serviceContactInfo.insert(Converter.convert(order.getContactInfo(), EntityContactInfo.class));
+
+        // save order
+        final Long orderId = this.serviceOrder.insert(this.createNewOrderFromDtoOrderItemsWithContactInfo(order.getItems(), contactInfoId));
+
+        // save order items
+        this.makeItemPairsByUuid(
+                order.getItems(),
+                this.serviceItem.findByUuids(order.getItems().stream().map(DtoOrderItem::getItemUuid).toList())
+        ).forEach((itemDto, item) -> this.serviceOrderItem.insert(new EntityOrderItem(item.getId(), orderId, itemDto.getAmount(), itemDto.getPrice())));
     }
 
-    /**
-     * Gets detail object by given id
-     *
-     * @param id    wanted id
-     * @return      detail object
-     */
-    public DtoOrderDetail getDetailById(Long id) {
-        EntityOrder order = this.dao.findById(id);
-        if (order == null) return null;
-
-        DtoOrderDetail detail = Converter.convert(order, DtoOrderDetail.class);
-        final List<DtoSingleOrderItem> orderItems = this.extractOrderItemsFromSerializedForm(order.getContent());
-        detail.setOrderItems(orderItems);
-
-        return detail;
+    private EntityOrder createNewOrderFromDtoOrderItemsWithContactInfo(List<DtoOrderItem> items, Long contactInfoId) {
+        final EntityOrder order = this.createNewOrderFromDtoOrderItems(items);
+        order.setContactInfo(contactInfoId);
+        return order;
     }
 
-    public List<DtoOrder> getWithCriteria(LazyCriteria lazyCriteria) {
-        return
-                this.dao.getOrdersWithCriteria(lazyCriteria)
-                .stream()
-                .map(o -> Converter.convert(o, DtoOrder.class))
-                .toList();
+    private EntityOrder createNewOrderFromDtoOrderItems(List<DtoOrderItem> items) {
+        if (items == null || items.isEmpty()) return this.createEmptyItemsOrder();
+
+        return EntityOrder.builder()
+                .price(items.stream().map(DtoOrderItem::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add))
+                .status(OrderStatus.OPEN)
+                .payStatus(OrderPayStatus.NOT_PAID)
+                .build();
     }
 
-    public Long count(Map<String, Object> filter) {
-        return this.dao.totalRowCount(filter);
+    private EntityOrder createEmptyItemsOrder() {
+        return EntityOrder.builder()
+                .status(OrderStatus.OPEN)
+                .payStatus(OrderPayStatus.NOT_PAID)
+                .price(BigDecimal.ZERO)
+                .build();
     }
 
-    public void editFinalization(Long id, boolean newValue) {
-        EntityOrder order = this.dao.findById(id);
-        if (order == null) return;
+    private Map<DtoOrderItem, EntityItem> makeItemPairsByUuid(List<DtoOrderItem> dtoOrderItems, List<EntityItem> items) {
+        if (dtoOrderItems == null || items == null || dtoOrderItems.isEmpty() || items.isEmpty()) return Collections.emptyMap();
 
-        order.setFinished(newValue);
-        this.dao.update(order);
-    }
+        final Map<DtoOrderItem, EntityItem> result = new HashMap<>();
 
-    /**
-     * Reads serialized form of orders and returns list of order items
-     *
-     * @param ordersSerialized  Orders serialized
-     * @return                  List of order items
-     */
-    private List<DtoSingleOrderItem> extractOrderItemsFromSerializedForm(String ordersSerialized) {
-        final List<DeserializedOrderModel> ordersDeserialized = Arrays.asList(Converter.read(ordersSerialized, DeserializedOrderModel[].class));
-        return this.getOrderItemsFromSerializedModels(ordersDeserialized);
-    }
 
-    /**
-     * Reads information from deserialized orders, and returns list of order items
-     *
-     * @param models    all the deserialized orders we want to extract from
-     * @return          List of order items
-     */
-    private List<DtoSingleOrderItem> getOrderItemsFromSerializedModels(List<DeserializedOrderModel> models) {
-        final List<String> itemUuids = models.stream().map(DeserializedOrderModel::getUuid).collect(Collectors.toList());
-        List<DtoItem> items = this.serviceItem.findByUuidsWithImages(itemUuids);
-        return items.stream().map(
-                item -> {
-                    // find deserialized order assigned to item (same uuid)
-                    final DeserializedOrderModel assignedDeserialized = models.stream().filter(m -> Objects.equals(m.getUuid(), item.getUuid())).findFirst().orElse(null);
-                    if (assignedDeserialized == null) return null;
+        final Map<String, EntityItem> itemsByUuid = items.stream().collect(Collectors.toMap(
+                EntityItem::getUuid,
+                item -> items.stream().filter(i -> Objects.equals(i.getUuid(), item.getUuid())).findFirst().orElseThrow()));
 
-                    final DtoSingleOrderItem singleOrderItem = Converter.convert(item, DtoSingleOrderItem.class);
-                    singleOrderItem.setAmount(assignedDeserialized.getAmount());
-                    singleOrderItem.setPrice(assignedDeserialized.getPrice());
-                    return singleOrderItem;
-                }
-        )
-                .filter(Objects::nonNull)
-                .toList();
-    }
+        for (DtoOrderItem dtoOrderItem : dtoOrderItems) {
+            if (!itemsByUuid.containsKey(dtoOrderItem.getItemUuid())) continue;
 
-    @Data
-    public static class DeserializedOrderModel {
-        @JsonProperty("id")
-        private String uuid;
-        private Integer amount;
-        private BigDecimal price;
+            result.put(dtoOrderItem, itemsByUuid.get(dtoOrderItem.getItemUuid()));
+        }
+
+        return result;
     }
 }

@@ -24,7 +24,7 @@ public class DaoUser extends BaseDao<EntityUser> {
                 handle ->
                         handle.createQuery("SELECT * FROM printify.user WHERE username = :username")
                                 .bind("username", username)
-                                .mapToBean(EntityUser.class)
+                                .mapTo(EntityUser.class)
                                 .first()
         );
     }

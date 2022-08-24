@@ -1,24 +1,13 @@
 package com.example.printifybackend.order.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import com.example.printifybackend.contact_into.DtoContactInfo;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 
-@Data
+@Getter @Setter
 public class DtoOrder {
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String street;
-    private String city;
-    private String postCode;
-    private String phone;
-    @JsonFormat(pattern="dd.MM.yyyy HH:mm")
-    private LocalDateTime date;
-    private String content;
-    private BigDecimal price;
-    private Boolean finished;
+    private DtoContactInfo contactInfo;
+    private List<DtoOrderItem> items;
 }

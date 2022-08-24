@@ -1,9 +1,11 @@
 package com.example.printifybackend;
 
 import com.example.printifybackend.binary_obj.EntityBinaryObject;
+import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.item.EntityItem;
 import com.example.printifybackend.jdbi.EntityRowMapper;
 import com.example.printifybackend.order.EntityOrder;
+import com.example.printifybackend.user.EntityUser;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapperFactory;
 import org.jdbi.v3.postgres.PostgresPlugin;
@@ -40,6 +42,8 @@ public class JdbiConfig {
                 // here goes all the row mappers
                 .registerRowMapper(RowMapperFactory.of(EntityItem.class, new EntityRowMapper<>(EntityItem.class)))
                 .registerRowMapper(RowMapperFactory.of(EntityBinaryObject.class, new EntityRowMapper<>(EntityBinaryObject.class)))
+                .registerRowMapper(RowMapperFactory.of(EntityUser.class, new EntityRowMapper<>(EntityUser.class)))
+                .registerRowMapper(RowMapperFactory.of(EntityContactInfo.class, new EntityRowMapper<>(EntityContactInfo.class)))
                 .registerRowMapper(RowMapperFactory.of(EntityOrder.class, new EntityRowMapper<>(EntityOrder.class)))
                 ;
     }
