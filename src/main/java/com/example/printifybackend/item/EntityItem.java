@@ -3,8 +3,7 @@ package com.example.printifybackend.item;
 
 import com.example.printifybackend.binary_obj.EntityBinaryObject;
 import com.example.printifybackend.jdbi.BaseEntity;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -12,6 +11,8 @@ import java.math.BigDecimal;
 @Getter @Setter
 @Entity
 @Table(name = "item", schema = "printify")
+@Builder
+@AllArgsConstructor @NoArgsConstructor
 public class EntityItem extends BaseEntity {
 
     @Column(name = "uuid", length = 36)

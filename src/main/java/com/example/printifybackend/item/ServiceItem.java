@@ -2,6 +2,8 @@ package com.example.printifybackend.item;
 
 import com.example.printifybackend.AbstractEntityService;
 import com.example.printifybackend.Converter;
+import com.example.printifybackend.keyring.dto.DtoItemKeyring;
+import com.example.printifybackend.utils.UuidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,24 @@ public class ServiceItem extends AbstractEntityService<EntityItem, DaoItem> {
     @Autowired
     public ServiceItem(DaoItem daoItem) {
         super(daoItem);
+    }
+
+    public EntityItem getItemFromKeyringItem(DtoItemKeyring keyring, Long fileId) {
+        return EntityItem.builder()
+                .uuid(UuidUtils.getRandomUuid())
+                .fileId(fileId)
+                .name(keyring.companyName())
+                .internetVisible(false)
+                .type(ItemType.KEYRING)
+                .build();
+    }
+
+    public EntityItem  getItemFromKeyringItem(DtoItemKeyring keyring) {
+        return this.getItemFromKeyringItem(keyring, null);
+    }
+
+    public Long saveKeyringItem(DtoItemKeyring keyring, Long fileId) {
+        return this.insert(this.getItemFromKeyringItem(keyring, fileId));
     }
 
     public DtoItem findByUuidWithImage(String uuid) {
@@ -53,7 +73,4 @@ public class ServiceItem extends AbstractEntityService<EntityItem, DaoItem> {
         return this.dao.findByUuids(uuids);
     }
 
-    public void deleteById(Long id) {
-        this.dao.deleteById(id);
-    }
 }

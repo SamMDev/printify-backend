@@ -30,4 +30,7 @@ public class EntityOrder extends BaseEntity {
     @Column(name = "pay_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderPayStatus payStatus;
+
+    @Column(name = "additional_info", length = 1000)
+    private String additionalInfo;
 }

@@ -50,6 +50,14 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
         .forEach((itemDto, item) -> this.serviceOrderItem.insert(new EntityOrderItem(item.getId(), orderId, itemDto.getAmount(), itemDto.getPrice())));
     }
 
+
+    public EntityOrder createNewEmptyOrder() {
+        return EntityOrder.builder()
+                .status(OrderStatus.OPEN)
+                .payStatus(OrderPayStatus.NOT_PAID)
+                .build();
+    }
+
     private EntityOrder createNewOrderFromDtoOrderItemsWithContactInfo(List<DtoOrderItem> items, Long contactInfoId) {
         final EntityOrder order = this.createNewOrderFromDtoOrderItems(items);
         order.setContactInfoId(contactInfoId);
