@@ -17,8 +17,8 @@ import java.math.BigDecimal;
 public class EntityOrder extends BaseEntity {
 
     @ManyToOne(targetEntity = EntityContactInfo.class)
-    @Column(name = "contact_info", nullable = false)
-    private Long contactInfo;
+    @Column(name = "contact_info_id", nullable = false)
+    private Long contactInfoId;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;

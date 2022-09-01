@@ -1,5 +1,7 @@
 package com.example.printifybackend.jdbi;
 
+import com.example.printifybackend.jdbi.reflect.EntityReflect;
+import com.example.printifybackend.jdbi.reflect.EntityReflectionManager;
 import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -12,7 +14,7 @@ import java.sql.SQLException;
 
 public class EntityRowMapper<E extends BaseEntity> implements RowMapper<E> {
 
-    private final EntityReflectionManager.EntityReflect<E> reflect;
+    private final EntityReflect<E> reflect;
 
     public EntityRowMapper(Class<E> entityClazz) {
         this.reflect = EntityReflectionManager.reflectionOf(entityClazz);

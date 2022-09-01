@@ -1,5 +1,8 @@
 package com.example.printifybackend.jdbi;
 
+import com.example.printifybackend.jdbi.query_generator.*;
+import com.example.printifybackend.jdbi.reflect.EntityReflect;
+import com.example.printifybackend.jdbi.reflect.EntityReflectionManager;
 import org.jdbi.v3.core.Jdbi;
 
 import java.util.List;
@@ -13,13 +16,7 @@ import java.util.List;
  */
 @SuppressWarnings("squid:S1192")
 public abstract class BaseDao<E extends BaseEntity> {
-    private static final String INSERT_ENTITY_TEMPLATE = "INSERT INTO <NAME> (<COLUMNS>) VALUES (<VALUES>)";
-    private static final String UPDATE_ENTITY_TEMPLATE = "UPDATE <NAME> SET <SET> WHERE id = :id";
-    private static final String DELETE_BY_ID_TEMPLATE = "DELETE FROM <NAME> WHERE id = :id";
-    private static final String FIND_ALL_TEMPLATE = "SELECT * FROM <NAME>";
-    private static final String FIND_BY_ID_TEMPLATE = "SELECT * FROM <NAME> WHERE id = :id";
-
-    private final EntityReflectionManager.EntityReflect<E> reflect;
+    private final EntityReflect<E> reflect;
 
     private final String insertEntityQuery;
     private final String updateEntityQuery;
@@ -32,33 +29,13 @@ public abstract class BaseDao<E extends BaseEntity> {
     protected BaseDao(Class<E> clazz, Jdbi jdbi) {
 
         this.jdbi = jdbi;
-
         this.reflect = EntityReflectionManager.reflectionOf(clazz);
 
-        final String TABLE_NAME = "printify." + reflect.getTableName();
-
-        this.insertEntityQuery = INSERT_ENTITY_TEMPLATE
-                .replace("<NAME>", TABLE_NAME)
-                // inserting without id
-                .replace("<COLUMNS>", String.join(",", reflect.getColumnNamesWithoutId()))
-                .replace("<VALUES>", String.join(",", reflect.getColumnNamesWithoutId().stream().map(c -> ":" + c).toList()));
-
-        this.updateEntityQuery = UPDATE_ENTITY_TEMPLATE
-                .replace("<NAME>", TABLE_NAME)
-                // don't ever want to update ID
-                .replace("<SET>", String.join(
-                        ",",
-                        reflect.getColumnNamesWithoutId().stream().map(pair -> String.format("%s = :%s", pair, pair)).toList())
-                );
-
-        this.deleteByIdQuery = DELETE_BY_ID_TEMPLATE
-                .replace("<NAME>", TABLE_NAME);
-
-        this.findAllQuery = FIND_ALL_TEMPLATE
-                .replace("<NAME>", TABLE_NAME);
-
-        this.findByIdQuery = FIND_BY_ID_TEMPLATE
-                .replace("<NAME>", TABLE_NAME);
+        this.insertEntityQuery = new InsertQueryGenerator(this.reflect).getResult();
+        this.updateEntityQuery = new UpdateQueryGenerator(this.reflect).getResult();
+        this.deleteByIdQuery = new DeleteQueryGenerator(this.reflect).getResult();
+        this.findAllQuery = new FindAllQueryGenerator(this.reflect).getResult();
+        this.findByIdQuery = new FindByIdQueryGenerator(this.reflect).getResult();
     }
 
     public Long insert(E entity) {
@@ -66,7 +43,7 @@ public abstract class BaseDao<E extends BaseEntity> {
     }
 
     public void update(E entity) {
-        this.jdbi.withHandle(handle -> handle.createUpdate(updateEntityQuery).bindBean(entity).execute());
+        this.jdbi.withHandle(handle -> handle.createUpdate(updateEntityQuery).bindBean(entity).bind("id", entity.getId()).execute());
     }
 
     public E findById(Long id) {

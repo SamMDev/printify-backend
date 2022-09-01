@@ -5,7 +5,6 @@ import com.example.printifybackend.auth.filter.AuthorizationTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -38,10 +37,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    /**
-     * Configuring http requests
-         * Configuring paths and access restrictions (privileges)
-     */
     protected void configure(HttpSecurity http) throws Exception {
         http = http.cors().and().csrf().disable();
 
@@ -57,28 +52,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests()
 
-                .antMatchers(HttpMethod.OPTIONS, "/auth/sign-in").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/auth/sign-up").permitAll()
-
-                // Our public endpoints
-                .antMatchers(HttpMethod.GET, "/item/all").hasAnyAuthority("ADD_PRODUCTS", "MANAGE_ORDERS", "SHOW_ORDERS")
-                .antMatchers(HttpMethod.GET, "/item/internet-visible").permitAll()
-                .antMatchers(HttpMethod.GET, "/item/internet-visible/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/order/get").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
-
-                .antMatchers(HttpMethod.POST, "/auth/sign-up").permitAll()
-                .antMatchers(HttpMethod.POST, "/auth/sign-in").permitAll()
-
-                .antMatchers(HttpMethod.POST, "/order/save").permitAll()
-                .antMatchers(HttpMethod.POST, "/order/id/**").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
-
-                .antMatchers(HttpMethod.POST, "/item/uuid").permitAll()
-                .antMatchers(HttpMethod.GET, "/item/uuid/**").permitAll()
-
-                .antMatchers(HttpMethod.GET, "/user/all").hasAuthority("MANAGE_USERS")
-
-                // Our private endpoints
-                .anyRequest().authenticated();
+//                .antMatchers(HttpMethod.OPTIONS, "/auth/sign-in").permitAll()
+//                .antMatchers(HttpMethod.OPTIONS, "/auth/sign-up").permitAll()
+//
+//                // Our public endpoints
+//                .antMatchers(HttpMethod.GET, "/item/all").hasAnyAuthority("ADD_PRODUCTS", "MANAGE_ORDERS", "SHOW_ORDERS")
+//                .antMatchers(HttpMethod.GET, "/item/internet-visible").permitAll()
+//                .antMatchers(HttpMethod.GET, "/item/internet-visible/**").permitAll()
+//                .antMatchers(HttpMethod.POST, "/order/get").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
+//
+//                .antMatchers(HttpMethod.POST, "/auth/sign-up").permitAll()
+//                .antMatchers(HttpMethod.POST, "/auth/sign-in").permitAll()
+//
+//                .antMatchers(HttpMethod.POST, "/order/save").permitAll()
+//                .antMatchers(HttpMethod.POST, "/order/id/**").hasAnyAuthority("MANAGE_ORDERS", "SHOW_ORDERS")
+//
+//                .antMatchers(HttpMethod.POST, "/item/uuid").permitAll()
+//                .antMatchers(HttpMethod.GET, "/item/uuid/**").permitAll()
+//
+//                .antMatchers(HttpMethod.GET, "/user/all").hasAuthority("MANAGE_USERS")
+//
+//                // Our private endpoints
+//                .anyRequest().authenticated();
+                    .anyRequest().permitAll();
 
         // add filter before every request (to check if is authorized)
         http.addFilterBefore(this.authorizationTokenFilter, UsernamePasswordAuthenticationFilter.class);

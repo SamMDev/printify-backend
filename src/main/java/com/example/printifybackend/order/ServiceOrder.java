@@ -20,15 +20,13 @@ import java.util.stream.Collectors;
 public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
 
     private final ServiceContactInfo serviceContactInfo;
-    private final ServiceOrder serviceOrder;
     private final ServiceOrderItem serviceOrderItem;
     private final ServiceItem serviceItem;
 
     @Autowired
-    public ServiceOrder(DaoOrder dao, ServiceContactInfo serviceContactInfo, ServiceOrder serviceOrder, ServiceOrderItem serviceOrderItem, ServiceItem serviceItem) {
+    public ServiceOrder(DaoOrder dao, ServiceContactInfo serviceContactInfo, ServiceOrderItem serviceOrderItem, ServiceItem serviceItem) {
         super(dao);
         this.serviceContactInfo = serviceContactInfo;
-        this.serviceOrder = serviceOrder;
         this.serviceOrderItem = serviceOrderItem;
         this.serviceItem = serviceItem;
     }
@@ -41,18 +39,20 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
         final Long contactInfoId = this.serviceContactInfo.insert(Converter.convert(order.getContactInfo(), EntityContactInfo.class));
 
         // save order
-        final Long orderId = this.serviceOrder.insert(this.createNewOrderFromDtoOrderItemsWithContactInfo(order.getItems(), contactInfoId));
+        final Long orderId = this.insert(this.createNewOrderFromDtoOrderItemsWithContactInfo(order.getItems(), contactInfoId));
 
         // save order items
         this.makeItemPairsByUuid(
                 order.getItems(),
                 this.serviceItem.findByUuids(order.getItems().stream().map(DtoOrderItem::getItemUuid).toList())
-        ).forEach((itemDto, item) -> this.serviceOrderItem.insert(new EntityOrderItem(item.getId(), orderId, itemDto.getAmount(), itemDto.getPrice())));
+        )
+        // save each found pair
+        .forEach((itemDto, item) -> this.serviceOrderItem.insert(new EntityOrderItem(item.getId(), orderId, itemDto.getAmount(), itemDto.getPrice())));
     }
 
     private EntityOrder createNewOrderFromDtoOrderItemsWithContactInfo(List<DtoOrderItem> items, Long contactInfoId) {
         final EntityOrder order = this.createNewOrderFromDtoOrderItems(items);
-        order.setContactInfo(contactInfoId);
+        order.setContactInfoId(contactInfoId);
         return order;
     }
 
@@ -74,6 +74,9 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
                 .build();
     }
 
+    /**
+     * With given dtoOrderItems and items, make pairs by uuid
+     */
     private Map<DtoOrderItem, EntityItem> makeItemPairsByUuid(List<DtoOrderItem> dtoOrderItems, List<EntityItem> items) {
         if (dtoOrderItems == null || items == null || dtoOrderItems.isEmpty() || items.isEmpty()) return Collections.emptyMap();
 
