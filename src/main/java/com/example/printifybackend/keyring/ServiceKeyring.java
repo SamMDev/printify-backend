@@ -5,6 +5,8 @@ import com.example.printifybackend.binary_obj.EntityBinaryObject;
 import com.example.printifybackend.binary_obj.ServiceBinaryObject;
 import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.contact_into.ServiceContactInfo;
+import com.example.printifybackend.item.EntityItem;
+import com.example.printifybackend.item.ItemType;
 import com.example.printifybackend.item.ServiceItem;
 import com.example.printifybackend.keyring.dto.DtoKeyringOrder;
 import com.example.printifybackend.keyring.dto.DtoItemKeyring;
@@ -12,6 +14,7 @@ import com.example.printifybackend.order.EntityOrder;
 import com.example.printifybackend.order.EntityOrderItem;
 import com.example.printifybackend.order.ServiceOrder;
 import com.example.printifybackend.order.ServiceOrderItem;
+import com.example.printifybackend.utils.UuidUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +44,7 @@ public class ServiceKeyring {
         final Long fileId = this.serviceBinaryObject.insert(new EntityBinaryObject(keyringOrder.keyringItem().modelFile()));
 
         // insert keyring item as item
-        final Long itemId = this.serviceItem.saveKeyringItem(keyringOrder.keyringItem(), fileId);
+        final Long itemId = this.serviceItem.insert(this.getItemFromKeyringItem(keyringOrder.keyringItem(), fileId));
 
         // insert order item
         this.serviceOrderItem.insert(new EntityOrderItem(itemId, orderId, keyringOrder.keyringItem().amount(), null));
@@ -53,6 +56,16 @@ public class ServiceKeyring {
         final EntityOrder order = this.serviceOrder.createNewEmptyOrder();
         order.setAdditionalInfo(keyringItem.additionalInformation());
         return order;
+    }
+
+    private EntityItem getItemFromKeyringItem(DtoItemKeyring keyring, Long fileId) {
+        return EntityItem.builder()
+                .uuid(UuidUtils.getRandomUuid())
+                .fileId(fileId)
+                .name(keyring.companyName())
+                .internetVisible(false)
+                .type(ItemType.KEYRING)
+                .build();
     }
 
 

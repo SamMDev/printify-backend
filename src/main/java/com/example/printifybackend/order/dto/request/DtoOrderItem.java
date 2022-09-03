@@ -1,4 +1,4 @@
-package com.example.printifybackend.order.dto;
+package com.example.printifybackend.order.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

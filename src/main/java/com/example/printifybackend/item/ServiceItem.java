@@ -18,24 +18,6 @@ public class ServiceItem extends AbstractEntityService<EntityItem, DaoItem> {
         super(daoItem);
     }
 
-    public EntityItem getItemFromKeyringItem(DtoItemKeyring keyring, Long fileId) {
-        return EntityItem.builder()
-                .uuid(UuidUtils.getRandomUuid())
-                .fileId(fileId)
-                .name(keyring.companyName())
-                .internetVisible(false)
-                .type(ItemType.KEYRING)
-                .build();
-    }
-
-    public EntityItem  getItemFromKeyringItem(DtoItemKeyring keyring) {
-        return this.getItemFromKeyringItem(keyring, null);
-    }
-
-    public Long saveKeyringItem(DtoItemKeyring keyring, Long fileId) {
-        return this.insert(this.getItemFromKeyringItem(keyring, fileId));
-    }
-
     public DtoItem findByUuidWithImage(String uuid) {
         return Converter.accumulateJoinedToDto(this.dao.findByUuidWithImage(uuid), DtoItem.class);
     }

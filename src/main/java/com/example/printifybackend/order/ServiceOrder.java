@@ -6,8 +6,10 @@ import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.contact_into.ServiceContactInfo;
 import com.example.printifybackend.item.EntityItem;
 import com.example.printifybackend.item.ServiceItem;
-import com.example.printifybackend.order.dto.DtoOrder;
-import com.example.printifybackend.order.dto.DtoOrderItem;
+import com.example.printifybackend.jdbi.LazyCriteria;
+import com.example.printifybackend.order.dto.request.DtoRequestOrder;
+import com.example.printifybackend.order.dto.request.DtoOrderItem;
+import com.example.printifybackend.order.dto.response.DtoResponseOrder;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
         this.serviceItem = serviceItem;
     }
 
-    public void createOrder(DtoOrder order) {
+    public void createOrder(DtoRequestOrder order) {
         // none of these objects can be null
         if (order == null || ObjectUtils.anyNull(order.getItems(), order.getContactInfo())) return;
 
@@ -50,6 +52,12 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
         .forEach((itemDto, item) -> this.serviceOrderItem.insert(new EntityOrderItem(item.getId(), orderId, itemDto.getAmount(), itemDto.getPrice())));
     }
 
+    public List<DtoResponseOrder> getOrdersByCriteria(LazyCriteria criteria) {
+        return Optional.ofNullable(criteria)
+                .map(this.dao::loadByCriteria)
+                .map(orderList -> orderList.stream().map(order -> Converter.convert(order, DtoResponseOrder.class)).toList())
+                .orElse(Collections.emptyList());
+    }
 
     public EntityOrder createNewEmptyOrder() {
         return EntityOrder.builder()

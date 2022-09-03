@@ -2,18 +2,18 @@ package com.example.printifybackend.order;
 
 import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.jdbi.BaseEntity;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Builder
 @Getter
 @Setter
 @Entity
 @Table(name = "order", schema = "printify")
+@NoArgsConstructor @AllArgsConstructor
 public class EntityOrder extends BaseEntity {
 
     @ManyToOne(targetEntity = EntityContactInfo.class)
@@ -33,4 +33,7 @@ public class EntityOrder extends BaseEntity {
 
     @Column(name = "additional_info", length = 1000)
     private String additionalInfo;
+
+    @Column(name = "created", nullable = false)
+    private LocalDateTime created;
 }
