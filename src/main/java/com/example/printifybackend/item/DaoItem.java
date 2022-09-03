@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -103,6 +104,17 @@ public class DaoItem extends BaseDao<EntityItem> {
                         .mapTo(EntityItem.class)
                         .collect(Collectors.toList())
         );
+    }
+
+    public Optional<EntityItem> findByUuid(String uuid) {
+        return Optional.ofNullable(
+                this.jdbi.withHandle(handle ->
+                    handle
+                            .createQuery("SELECT * FROM printify.item WHERE item.uuid = :uuid")
+                            .bind("uuid", uuid)
+                            .mapTo(EntityItem.class)
+                            .one()
+        ));
     }
 
 }

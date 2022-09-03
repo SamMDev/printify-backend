@@ -2,8 +2,6 @@ package com.example.printifybackend.item;
 
 import com.example.printifybackend.AbstractEntityService;
 import com.example.printifybackend.Converter;
-import com.example.printifybackend.keyring.dto.DtoItemKeyring;
-import com.example.printifybackend.utils.UuidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +51,13 @@ public class ServiceItem extends AbstractEntityService<EntityItem, DaoItem> {
 
     public List<EntityItem> findByUuids(List<String> uuids) {
         return this.dao.findByUuids(uuids);
+    }
+
+    public void changeVisibility(String itemUuid, boolean newValue) {
+        this.dao.findByUuid(itemUuid).ifPresent(item -> {
+            item.setInternetVisible(newValue);
+            this.update(item);
+        });
     }
 
 }

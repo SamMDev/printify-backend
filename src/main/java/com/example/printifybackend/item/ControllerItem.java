@@ -46,4 +46,9 @@ public class ControllerItem {
         this.serviceItem.deleteById(id);
     }
 
+    @PutMapping("/update/visibility")
+    public void changeVisibility(@RequestParam("uuid") String uuid, @RequestParam("visible") boolean visible) {
+        this.serviceItem.changeVisibility(uuid, visible);
+    }
+
 }
