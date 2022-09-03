@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
-
     private final ServiceContactInfo serviceContactInfo;
     private final ServiceOrderItem serviceOrderItem;
     private final ServiceItem serviceItem;

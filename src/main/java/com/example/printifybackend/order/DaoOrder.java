@@ -7,6 +7,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ public class DaoOrder extends BaseDao<EntityOrder> {
             super(select);
         }
 
+        @SuppressWarnings("squid:S1192")
         @Override
         public void buildAndAddWhereStatement(Map<String, Object> filters) {
             if (filters == null || filters.isEmpty()) return;
@@ -53,6 +55,18 @@ public class DaoOrder extends BaseDao<EntityOrder> {
                 final Long id = ((Number) filters.get("id")).longValue();
                 whereBuilder.addCondition("id = :id");
                 this.getBind().put("id", id);
+            }
+
+            if (filters.containsKey("dateFrom") && filters.get("dateFrom") != null) {
+                final LocalDateTime dateFrom = LocalDateTime.parse((String) filters.get("dateFrom"));
+                whereBuilder.addCondition(":dateFrom <= created");
+                this.getBind().put("dateFrom", dateFrom);
+            }
+
+            if (filters.containsKey("dateTo") && filters.get("dateTo") != null) {
+                final LocalDateTime dateTo = LocalDateTime.parse((String) filters.get("dateTo"));
+                whereBuilder.addCondition(":dateTo >= created");
+                this.getBind().put("dateTo", dateTo);
             }
 
             this.setWhereStatement(whereBuilder.buildWhere());
