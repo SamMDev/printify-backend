@@ -50,9 +50,9 @@ public class DaoOrder extends BaseDao<EntityOrder> {
             final WhereConditionBuilder whereBuilder = new WhereConditionBuilder();
 
             if (filters.containsKey("id") && filters.get("id") != null) {
-                final Long id = (Long) filters.get("id");
-                whereBuilder.addCondition("order.id = :orderId");
-                this.getBind().put("orderId", id);
+                final Long id = ((Number) filters.get("id")).longValue();
+                whereBuilder.addCondition("id = :id");
+                this.getBind().put("id", id);
             }
 
             this.setWhereStatement(whereBuilder.buildWhere());
