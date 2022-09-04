@@ -5,6 +5,7 @@ import com.example.printifybackend.keyring.ServiceKeyring;
 import com.example.printifybackend.keyring.dto.DtoKeyringOrder;
 import com.example.printifybackend.order.dto.request.DtoRequestOrder;
 import com.example.printifybackend.order.dto.response.DtoResponseOrder;
+import com.example.printifybackend.order.dto.response.DtoResponseOrderDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,11 @@ public class ControllerOrder {
     @PostMapping("/get")
     public List<DtoResponseOrder> getOrders(@RequestBody LazyCriteria criteria) {
         return this.serviceOrder.getOrdersByCriteria(criteria);
+    }
+
+    @GetMapping("/get/detail/{id}")
+    public DtoResponseOrderDetail getDetail(@PathVariable("id") Long orderId) {
+        return this.serviceOrder.getOrderDetail(orderId);
     }
 
 }

@@ -1,8 +1,9 @@
 package com.example.printifybackend.order;
 
-import com.example.printifybackend.jdbi.BaseDao;
-import com.example.printifybackend.jdbi.DaoFilterQueryBuilder;
-import com.example.printifybackend.jdbi.LazyCriteria;
+import com.example.printifybackend.contact_into.EntityContactInfo;
+import com.example.printifybackend.item.EntityItem;
+import com.example.printifybackend.jdbi.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,7 @@ public class DaoOrder extends BaseDao<EntityOrder> {
     }
 
     public List<EntityOrder> loadByCriteria(LazyCriteria criteria) {
-        final DaoFilterQueryBuilder filterQueryBuilder = new DaoOrderQueryBuilder("SELECT * FROM printify.order");
+        final DaoFilterQueryBuilder filterQueryBuilder = new DaoOrderQueryBuilder("SELECT * FROM printify.order o");
         // add limit offset condition
         filterQueryBuilder.buildAndAddLimitOffsetStatement(criteria.getLimit(), criteria.getOffset());
         filterQueryBuilder.buildAndAddOrderByStatement(DESC, "created");
@@ -35,6 +36,64 @@ public class DaoOrder extends BaseDao<EntityOrder> {
                         .bindMap(filterQueryBuilder.getBind())
                         .mapTo(EntityOrder.class)
                         .collect(Collectors.toList())
+        );
+    }
+
+    /**
+     * Loads orders by criteria joined with order items and items
+     */
+    public List<JoinedEntity> loadByCriteriaWithItems(LazyCriteria criteria) {
+        final DaoFilterQueryBuilder filterQueryBuilder = new DaoOrderQueryBuilder("""
+                SELECT * FROM printify.order o
+                LEFT JOIN printify.order_item oi ON oi.order_id = o.id
+                LEFT JOIN printify.item i ON oi.item_id = i.id"""
+        );
+        // add limit offset condition
+        filterQueryBuilder.buildAndAddLimitOffsetStatement(criteria.getLimit(), criteria.getOffset());
+        filterQueryBuilder.buildAndAddOrderByStatement(DESC, "created");
+        filterQueryBuilder.buildAndAddWhereStatement(criteria.getFilter());
+
+        return this.jdbi.withHandle(handle ->
+                handle
+                        .createQuery(filterQueryBuilder.build())
+                        .bindMap(filterQueryBuilder.getBind())
+                        .reduceRows(
+                                new JoinEntityRowReducer<>(
+                                        EntityOrder.class,
+                                        Pair.of(EntityOrderItem.class, JoinedEntity.JoinType.ONE_TO_MANY),
+                                        Pair.of(EntityItem.class, JoinedEntity.JoinType.ONE_TO_MANY)
+                                ))
+                        .toList()
+        );
+    }
+
+    /**
+     * Loads orders by criteria joined with contact info, order items and items
+     */
+    public List<JoinedEntity> loadFullByCriteria(LazyCriteria criteria) {
+        final DaoFilterQueryBuilder filterQueryBuilder = new DaoOrderQueryBuilder("""
+                SELECT * FROM printify.order o
+                JOIN printify.contact_info ci ON o.contact_info_id = ci.id
+                LEFT JOIN printify.order_item oi ON oi.order_id = o.id
+                LEFT JOIN printify.item i ON oi.item_id = i.id"""
+        );
+        // add limit offset condition
+        filterQueryBuilder.buildAndAddLimitOffsetStatement(criteria.getLimit(), criteria.getOffset());
+        filterQueryBuilder.buildAndAddOrderByStatement(DESC, "created");
+        filterQueryBuilder.buildAndAddWhereStatement(criteria.getFilter());
+
+        return this.jdbi.withHandle(handle ->
+                handle
+                        .createQuery(filterQueryBuilder.build())
+                        .bindMap(filterQueryBuilder.getBind())
+                        .reduceRows(
+                                new JoinEntityRowReducer<>(
+                                        EntityOrder.class,
+                                        Pair.of(EntityContactInfo.class, JoinedEntity.JoinType.ONE_TO_ONE),
+                                        Pair.of(EntityOrderItem.class, JoinedEntity.JoinType.ONE_TO_MANY),
+                                        Pair.of(EntityItem.class, JoinedEntity.JoinType.ONE_TO_MANY)
+                                ))
+                        .toList()
         );
     }
 
@@ -53,7 +112,7 @@ public class DaoOrder extends BaseDao<EntityOrder> {
 
             if (filters.containsKey("id") && filters.get("id") != null) {
                 final Long id = ((Number) filters.get("id")).longValue();
-                whereBuilder.addCondition("id = :id");
+                whereBuilder.addCondition("o.id = :id");
                 this.getBind().put("id", id);
             }
 

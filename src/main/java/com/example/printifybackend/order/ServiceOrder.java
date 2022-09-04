@@ -2,14 +2,19 @@ package com.example.printifybackend.order;
 
 import com.example.printifybackend.AbstractEntityService;
 import com.example.printifybackend.Converter;
+import com.example.printifybackend.contact_into.DtoContactInfo;
 import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.contact_into.ServiceContactInfo;
 import com.example.printifybackend.item.EntityItem;
+import com.example.printifybackend.item.ItemType;
 import com.example.printifybackend.item.ServiceItem;
+import com.example.printifybackend.jdbi.JoinedEntity;
 import com.example.printifybackend.jdbi.LazyCriteria;
 import com.example.printifybackend.order.dto.request.DtoRequestOrder;
 import com.example.printifybackend.order.dto.request.DtoOrderItem;
 import com.example.printifybackend.order.dto.response.DtoResponseOrder;
+import com.example.printifybackend.order.dto.response.DtoResponseOrderDetail;
+import com.example.printifybackend.order.dto.response.DtoResponseOrderDetailOrderItemRow;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,9 +58,19 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
 
     public List<DtoResponseOrder> getOrdersByCriteria(LazyCriteria criteria) {
         return Optional.ofNullable(criteria)
-                .map(this.dao::loadByCriteria)
-                .map(orderList -> orderList.stream().map(order -> Converter.convert(order, DtoResponseOrder.class)).toList())
+                .map(this.dao::loadByCriteriaWithItems)
+                // joined to DtoResponseOrder
+                .map(joinedList -> joinedList.stream().map(this::joinedToDtoResponseObject).toList())
                 .orElse(Collections.emptyList());
+    }
+
+    public DtoResponseOrderDetail getOrderDetail(Long orderId) {
+        final LazyCriteria idCriteria = new LazyCriteria(null, null, Collections.singletonMap("id", orderId));
+        return this.dao.loadFullByCriteria(idCriteria)
+                .stream()
+                .findFirst()
+                .map(this::joinedToDtoResponseOrderDetail)
+                .orElse(null);
     }
 
     public EntityOrder createNewEmptyOrder() {
@@ -63,6 +78,60 @@ public class ServiceOrder extends AbstractEntityService<EntityOrder, DaoOrder> {
                 .status(OrderStatus.OPEN)
                 .payStatus(OrderPayStatus.NOT_PAID)
                 .build();
+    }
+
+    private DtoResponseOrderDetail joinedToDtoResponseOrderDetail(JoinedEntity joined) {
+        final DtoResponseOrderDetail orderDetail = Converter.convert(this.joinedToDtoResponseObject(joined), DtoResponseOrderDetail.class);
+        orderDetail.setContactInfo(Converter.convert(joined.getJoinedOne(EntityContactInfo.class), DtoContactInfo.class));
+        orderDetail.setOrderItems(this.getOrderItemsRowsFromJoinedEntity(joined));
+        return orderDetail;
+    }
+
+    private List<DtoResponseOrderDetailOrderItemRow> getOrderItemsRowsFromJoinedEntity(JoinedEntity entity) {
+        if (entity == null) return null;
+
+        final Set<EntityOrderItem> orderItems = entity.getJoinedMany(EntityOrderItem.class);
+        final Map<Long, EntityItem> items = entity.getJoinedMany(EntityItem.class).stream()
+                .collect(Collectors.toMap(EntityItem::getId, item -> item));
+
+       return orderItems.stream()
+                .map(orderItem -> {
+                    final EntityItem item = items.getOrDefault(orderItem.getItemId(), null);
+                    return this.toOrderItemRow(orderItem, item);
+                })
+               .toList();
+    }
+
+    private DtoResponseOrderDetailOrderItemRow toOrderItemRow(EntityOrderItem orderItem, EntityItem item) {
+        if (orderItem == null || item == null) return null;
+
+        return DtoResponseOrderDetailOrderItemRow.builder()
+                .amount(orderItem.getAmount())
+                .price(orderItem.getPrice())
+                .item(Converter.convert(item, DtoResponseOrderDetailOrderItemRow.DtoDetailItemRow.class))
+                .build();
+    }
+
+    private DtoResponseOrder joinedToDtoResponseObject(JoinedEntity joined) {
+        if (joined == null) return null;
+
+        return Optional.ofNullable(joined.getJoinedOne(EntityOrder.class))
+                .map(e -> {
+                    final DtoResponseOrder result = Converter.convert(e, DtoResponseOrder.class);
+                    result.setOrderType(this.determineOrderType(joined.getJoinedMany(EntityItem.class)));
+                    return result;
+                })
+                .orElse(null);
+    }
+
+    private OrderType determineOrderType(Collection<EntityItem> itemsForOrder) {
+        if (itemsForOrder == null) return null;
+
+        return itemsForOrder.stream()
+                .map(EntityItem::getType)
+                .findFirst()
+                .map(type -> type == ItemType.KEYRING ? OrderType.KEYRING_ORDER : OrderType.PRODUCT_ORDER)
+                .orElse(null);
     }
 
     private EntityOrder createNewOrderFromDtoOrderItemsWithContactInfo(List<DtoOrderItem> items, Long contactInfoId) {

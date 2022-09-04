@@ -5,6 +5,7 @@ import com.example.printifybackend.contact_into.EntityContactInfo;
 import com.example.printifybackend.item.EntityItem;
 import com.example.printifybackend.jdbi.EntityRowMapper;
 import com.example.printifybackend.order.EntityOrder;
+import com.example.printifybackend.order.EntityOrderItem;
 import com.example.printifybackend.user.EntityUser;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapperFactory;
@@ -45,6 +46,7 @@ public class JdbiConfig {
                 .registerRowMapper(RowMapperFactory.of(EntityUser.class, new EntityRowMapper<>(EntityUser.class)))
                 .registerRowMapper(RowMapperFactory.of(EntityContactInfo.class, new EntityRowMapper<>(EntityContactInfo.class)))
                 .registerRowMapper(RowMapperFactory.of(EntityOrder.class, new EntityRowMapper<>(EntityOrder.class)))
+                .registerRowMapper(RowMapperFactory.of(EntityOrderItem.class, new EntityRowMapper<>(EntityOrderItem.class)))
                 ;
     }
 
